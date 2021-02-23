@@ -9,13 +9,24 @@ void DEMO_Svg::setup() {
 
 	//--
 
+	// set the svg file and jpg lines
+
 	//img.load(path + "moebius/moebius-lines.jpg");
 	//svg.load(path + "moebius/moebius-giraud.svg");
 	//shape = glm::vec2(838, 1080);
+	//maxNumSvgGroupColors = 7;
 
 	img.load(path_Global + "nike/nike.jpg");
 	svg.load(path_Global + "nike/nike.svg");
 	shape = glm::vec2(1024, 666);
+	maxNumSvgGroupColors = 8;
+
+	//TODO:
+	//should auto get the num of groups
+	//for the momment we need to set manualy the num of groups.
+	//remember to name the the groups as: group1, group2, group3... on Illustrator
+	//use SVG 1.1 tiny file format.
+	//shared_ptr<ofxSvgGroup> bGroup = svg.get< ofxSvgGroup>(name.c_str());
 
 	//--
 
@@ -40,9 +51,7 @@ void DEMO_Svg::setup() {
 	blendMode = 1;//multiply
 
 	paletteSvg.clear();
-	paletteSvg.resize(maxNumColors);
-
-	//initializeColors();
+	paletteSvg.resize(maxNumSvgGroupColors);
 
 	// draggable rect
 	rectDgSvg.setRect(rSvgBounds.getX(), rSvgBounds.getY(), rSvgBounds.getWidth(), rSvgBounds.getHeight());//default init
@@ -86,6 +95,7 @@ void DEMO_Svg::setPaletteColors(vector<ofColor> &_palette) {
 		int _max = MAX(paletteSvg.size(), _palette.size());
 
 		//TODO:
+		//manual mode to call every frame
 
 		if (paletteSvg.size() < _palette.size())
 		{
@@ -154,44 +164,48 @@ void DEMO_Svg::Changed_Controls(ofAbstractParameter &e)
 
 //--------------------------------------------------------------
 void DEMO_Svg::update() {
-	//float val = (1 + sin(2 * 3.1416 * ofGetElapsedTimef())) * 0.5;
-	//ofLogNotice(__FUNCTION__) << val;
 
-	// DEMO2
-	//if (DEMO2_Test) update();
+	//// a. manually update every on frame
 
-	//--
+	//int szp = paletteSvg.size();
+	//for (int i = 0; i < maxNumSvgGroupColors; i++)
+	//{
+	//	ofColor c = ofColor(paletteSvg[i % szp], alpha * 255.0);
+	//}
 
-	for (int i = 0; i < maxNumColors; i++)
+	//-
+
+	// b. update referenced palette
+
+	if (palette_TARGET != nullptr)
 	{
-		std::string name = "group" + ofToString(i);
+		int szp = palette_TARGET->size();
 
-		ofColor c = ofColor(paletteSvg[i], alpha * 255.0);
-
-		//if (i < paletteSvg.size())
-		//{
-		//	ofColor c = ofColor(paletteSvg[i], alpha * 255.0);
-		//}
-		//else
-		//{
-		//	ofColor c = ofColor(paletteSvg[i % paletteSvg.size()], alpha * 255.0);
-		//}
-
-		//ofColor c = paletteSvg[i];
-
-		//if (i == 0) c.setHue(128 + val * 128);
-		//else if (i % 2 == 0) c.setBrightness(128 + val * 128.0);
-		//else if (i % 2 != 0) c.setSaturation(val * 255.0);
-
-		shared_ptr<ofxSvgGroup> bGroup = svg.get< ofxSvgGroup>(name.c_str());
-
-		if (bGroup)
-		{
-			for (int e = 0; e < bGroup->getElements().size(); e++)
+			for (int i = 0; i < maxNumSvgGroupColors; i++)
 			{
-				shared_ptr< ofxSvgElement > te = dynamic_pointer_cast<ofxSvgElement>(bGroup->getElements()[e]);
+				paletteSvg[i] = (*palette_TARGET)[i % szp];
+			}
+	}
 
-				te->path.setFillColor(c);
+	//-
+
+	if (paletteSvg.size() != 0)
+	{
+		for (int i = 0; i < maxNumSvgGroupColors; i++)
+		{
+			std::string name = "group" + ofToString(i);
+
+			shared_ptr<ofxSvgGroup> bGroup = svg.get< ofxSvgGroup>(name.c_str());
+			if (bGroup && i < paletteSvg.size())
+			{
+				ofColor c = ofColor(paletteSvg[i], alpha * 255.0);
+
+				for (int e = 0; e < bGroup->getElements().size(); e++)
+				{
+					shared_ptr< ofxSvgElement > te = dynamic_pointer_cast<ofxSvgElement>(bGroup->getElements()[e]);
+
+					te->path.setFillColor(c);
+				}
 			}
 		}
 	}
@@ -214,10 +228,15 @@ void DEMO_Svg::draw(glm::vec2 _pos) //force pos
 //--------------------------------------------------------------
 void DEMO_Svg::draw()
 {
-
 	if (DEMO2_Test)
 	{
 		update();
+
+		//-
+
+		//TODO:
+		// nike
+		ofClear(255);
 
 		//-
 
@@ -241,6 +260,8 @@ void DEMO_Svg::draw()
 		ofPopMatrix();
 		//ofPopMatrix();
 
+		//-
+
 		if (rectDgSvg.isEditing())
 		{
 			////highlight
@@ -261,8 +282,11 @@ void DEMO_Svg::draw()
 		ofPopStyle();
 	}
 
+	//-
+
 	if (ShowGui) gui.draw();
 
+	//ImGui
 	//ofxImGui::AddParameter(DEMO2_Svg.DEMO2_Test);
 	//if (DEMO2_Svg.DEMO2_Test)
 	//{
@@ -275,6 +299,13 @@ void DEMO_Svg::draw()
 	//	{
 	//	}
 	//}
+}
+
+//--------------------------------------------------------------
+void DEMO_Svg::setLinkPalette(vector<ofColor> &p)
+{
+	ofLogNotice(__FUNCTION__);
+	palette_TARGET = &p;
 }
 
 //--------------------------------------------------------------
