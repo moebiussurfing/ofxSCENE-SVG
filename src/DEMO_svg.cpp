@@ -1,4 +1,4 @@
-#include "DEMO_Svg.h"
+﻿#include "DEMO_Svg.h"
 
 //--------------------------------------------------------------
 void DEMO_Svg::setup() {
@@ -11,15 +11,22 @@ void DEMO_Svg::setup() {
 
 	// set the svg file and jpg lines
 
-	//img.load(path + "moebius/moebius-lines.jpg");
-	//svg.load(path + "moebius/moebius-giraud.svg");
+	// moebius.svg
+	//svg.load(path_Global + "moebius/moebius-giraud.svg");
+	//img.load(path_Global + "moebius/moebius-lines.jpg");
 	//shape = glm::vec2(838, 1080);
 	//maxNumSvgGroupColors = 7;
 
-	img.load(path_Global + "nike/nike.jpg");
+	// nike.svg
 	svg.load(path_Global + "nike/nike.svg");
+#ifdef USE_MASK
+	img_Mask.load(path_Global + "nike/nike-Mask.jpg");
+#endif
+	img.load(path_Global + "nike/nike.jpg");
 	shape = glm::vec2(1024, 666);
 	maxNumSvgGroupColors = 8;
+
+	//--
 
 	//TODO:
 	//should auto get the num of groups
@@ -34,47 +41,79 @@ void DEMO_Svg::setup() {
 
 	rSvgBounds = svg.getBounds();
 
+	w = rSvgBounds.getWidth();
+	h = rSvgBounds.getHeight();
+
 	//TODO:
 	//scale
 	//svg.getTransformFromSvgMatrix
 	//getTransformFromSvgMatrix(string matrix, ofVec2f& apos, float & scaleX, float & scaleY, float & arotation)
 	//vector< shared_ptr<ofxSvgImage> > trees = svg.getElementsForType< ofxSvgImage>("trees");
 
-	shape = glm::vec2(rSvgBounds.getWidth(), rSvgBounds.getHeight());
+	shape = glm::vec2(w, h);
 	//ratio = shape.x / shape.y;
 
-	img.resize(rSvgBounds.getWidth(), rSvgBounds.getHeight());
+	img.resize(w, h);
 
-	psBlend.setup(rSvgBounds.getWidth(), rSvgBounds.getHeight());
-	//psBlend.setup(img.getWidth(), img.getHeight());
+#ifdef USE_MASK
+	img_Mask.resize(w, h);
+#endif
 
-	blendMode = 1;//multiply
+	//psBlend.setup(w, h);
+	psBlend.setup(img.getWidth(), img.getHeight());
+
+	//blendMode = 1;//multiply
 
 	paletteSvg.clear();
 	paletteSvg.resize(maxNumSvgGroupColors);
 
 	// draggable rect
-	rectDgSvg.setRect(rSvgBounds.getX(), rSvgBounds.getY(), rSvgBounds.getWidth(), rSvgBounds.getHeight());//default init
-	rectDgSvg.setLockResize(false);
-	//rectDgSvg.setLockResize(true);
+	rSvg.setRect(rSvgBounds.getX(), rSvgBounds.getY(), w, h);//default init
+	rSvg.setLockResize(false);
+	//rSvg.setLockResize(true);
 
 	// b. load settings
-	//rectDgSvg.loadSettings();
+	//rSvg.loadSettings();
 	path_Layout = path_Global;
-	rectDgSvg.loadSettings(path_Name, path_Layout, false);
-	rectDgSvg.disableEdit();
+	rSvg.loadSettings(path_Name, path_Layout, false);
+	rSvg.disableEdit();
 
-	//rectDgSvg.enableEdit();
+	//rSvg.enableEdit();
 
-	//_xx = rectDgSvg.getX() + _pad1;
-	//_yy = rectDgSvg.getY() + _pad1;
+	//_xx = rSvg.getX() + _pad1;
+	//_yy = rSvg.getY() + _pad1;
 
-	//-
+	//--
+
+#ifdef USE_MASK
+	srcFbo.allocate(1920, 1080, GL_RGBA);
+	//srcFbo.allocate(w, h, GL_RGBA);
+	srcFbo.begin();
+	{
+		ofClear(0);
+	}
+	srcFbo.end();
+
+	maskFbo.allocate(1920, 1080, GL_RGBA);
+	//maskFbo.allocate(w, h, GL_RGBA);
+	maskFbo.begin();
+	{
+		ofClear(0);
+	}
+	maskFbo.end();
+#endif
+
+	//--
+
+	//blendMode.setSerializable(false);
+	//blendModeName.setSerializable(false);
 
 	params.add(DEMO2_Test);
 	params.add(DEMO2_Edit);
 	params.add(DEMO2_Scale);
 	params.add(DEMO2_Alpha);
+	params.add(blendMode);
+	params.add(blendModeName);
 
 	ofAddListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
 
@@ -128,7 +167,7 @@ void DEMO_Svg::mouseScrolled(ofMouseEventArgs &eventArgs)
 
 	if (DEMO2_Edit)
 	{
-		if (rectDgSvg.inside(glm::vec2(x, y)))//zoom 
+		if (rSvg.inside(glm::vec2(x, y)))//zoom 
 			if (scrollY == 1) DEMO2_Scale += 0.025f;
 			else if (scrollY == -1) DEMO2_Scale -= 0.025f;
 	}
@@ -160,69 +199,188 @@ void DEMO_Svg::Changed_Controls(ofAbstractParameter &e)
 	{
 		setAlpha(DEMO2_Alpha);
 	}
+
+	// blend
+	else if (name == blendMode.getName())
+	{
+		blendModeName = psBlend.getBlendMode(blendMode);
+	}
 }
 
 //--------------------------------------------------------------
 void DEMO_Svg::update() {
 
-	//// a. manually update every on frame
-
-	//int szp = paletteSvg.size();
-	//for (int i = 0; i < maxNumSvgGroupColors; i++)
-	//{
-	//	ofColor c = ofColor(paletteSvg[i % szp], alpha * 255.0);
-	//}
-
-	//-
-
-	// b. update referenced palette
-
-	if (palette_TARGET != nullptr)
+	// update colors
 	{
-		int szp = palette_TARGET->size();
+		//// a. manually update every on frame
+
+		//int szp = paletteSvg.size();
+		//for (int i = 0; i < maxNumSvgGroupColors; i++)
+		//{
+		//	ofColor c = ofColor(paletteSvg[i % szp], alpha * 255.0);
+		//}
+
+		//-
+
+		// b. update referenced palette
+
+		if (palette_TARGET != nullptr)
+		{
+			int szp = palette_TARGET->size();
 
 			for (int i = 0; i < maxNumSvgGroupColors; i++)
 			{
 				paletteSvg[i] = (*palette_TARGET)[i % szp];
 			}
-	}
+		}
 
-	//-
+		//--
 
-	if (paletteSvg.size() != 0)
-	{
-		for (int i = 0; i < maxNumSvgGroupColors; i++)
+		// assign fill color to svg groups
+
+		if (paletteSvg.size() != 0)
 		{
-			std::string name = "group" + ofToString(i);
-
-			shared_ptr<ofxSvgGroup> bGroup = svg.get< ofxSvgGroup>(name.c_str());
-			if (bGroup && i < paletteSvg.size())
+			for (int i = 0; i < maxNumSvgGroupColors; i++)
 			{
-				ofColor c = ofColor(paletteSvg[i], alpha * 255.0);
+				std::string name = "group" + ofToString(i);
 
-				for (int e = 0; e < bGroup->getElements().size(); e++)
+				shared_ptr<ofxSvgGroup> bGroup = svg.get< ofxSvgGroup>(name.c_str());
+				if (bGroup && i < paletteSvg.size())
 				{
-					shared_ptr< ofxSvgElement > te = dynamic_pointer_cast<ofxSvgElement>(bGroup->getElements()[e]);
+					ofColor c = ofColor(paletteSvg[i], alpha * 255.0);
 
-					te->path.setFillColor(c);
+					for (int e = 0; e < bGroup->getElements().size(); e++)
+					{
+						shared_ptr< ofxSvgElement > te = dynamic_pointer_cast<ofxSvgElement>(bGroup->getElements()[e]);
+
+						te->path.setFillColor(c);
+					}
 				}
 			}
 		}
 	}
 
-	//-
+	//--
 
-	psBlend.begin();
-	svg.draw();
-	psBlend.end();
+#ifdef USE_MASK
+	update_Mask();
+#endif
+
+	//--
+
+	// edit draggable scale object
+
+	if (rSvg.isEditing())
+	{
+		////highlight
+		//ofFill();
+		//int fr = ofGetFrameNum() % 60;
+		//ofSetColor(fr < 30 ? ofColor(255, 16) : (ofColor(0, 16)));
+		//ofDrawRectangle(rSvg);
+
+		//-
+
+		w2 = (rSvgBounds.getWidth() * scale);
+		h2 = (rSvgBounds.getHeight() * scale);
+
+		x2 = rSvg.getX();
+		y2 = rSvg.getY();
+
+		rSvg.setWidth(w2);
+		rSvg.setHeight(h2);
+
+		//float _ratio = rSvg.getHeight() / rSvg.getHeight();
+		//scale = rSvg.getY() / rSvgBounds.getY();
+	}
+}
+
+#ifdef USE_MASK
+//--------------------------------------------------------------
+void DEMO_Svg::update_Mask()
+{
+	srcFbo.begin();
+	{
+		ofClear(0);
+		draw_SVG();
+	}
+	srcFbo.end();
+
+	maskFbo.begin();
+	{
+		ofClear(0);
+		ofFill();
+		img_Mask.draw(x2, y2, w2, h2);
+	}
+	maskFbo.end();
 }
 
 //--------------------------------------------------------------
-void DEMO_Svg::draw(glm::vec2 _pos) //force pos
+void DEMO_Svg::draw_Mask()
 {
-	pos = _pos;
-	rectDgSvg.setPosition(pos.x, pos.y);
-	draw();
+	// srcFbo maskFbo
+	ofSetColor(255, 255);
+	alphaMask.begin(maskFbo.getTexture());
+	{
+		srcFbo.draw(0, 0, w, h);
+	}
+	alphaMask.end();
+
+	//previews
+	//ofPushMatrix();
+	//{
+	//	ofScale(scale, scale);
+	//	srcFbo.draw(0, 0);
+	//	maskFbo.draw(w, 0);
+	//}
+	//ofPopMatrix();
+}
+
+#endif
+
+////--------------------------------------------------------------
+//void DEMO_Svg::draw(glm::vec2 _pos) //force pos
+//{
+//	pos = _pos;
+//	rSvg.setPosition(pos.x, pos.y);
+//	draw();
+//}
+
+//--------------------------------------------------------------
+void DEMO_Svg::draw_SVG()
+{
+	psBlend.begin();
+	svg.draw();
+	psBlend.end();
+
+	//--
+
+	//TODO:
+	// nike
+	ofClear(255);
+
+	//-
+
+	//blend types
+	//string str;
+	//str += "Press UP/DOWN key\n";
+	//str += "Blend Mode: [" + ofToString(blendMode) + "] " + psBlend.getBlendMode(blendMode);
+	//ofDrawBitmapStringHighlight(str, 20, 30);
+
+	ofPushStyle();
+	ofPushMatrix();
+
+	ofTranslate(rSvg.getX(), rSvg.getY());
+
+	//ofPushMatrix();
+	//ofTranslate(rSvg.getWidth() / 2.f, rSvg.getHeight()/2.0f);
+	ofScale(scale);
+	{
+		psBlend.draw(img.getTextureReference(), blendMode);
+	}
+	//ofPopMatrix();
+
+	ofPopMatrix();
+	ofPopStyle();
 }
 
 //--------------------------------------------------------------
@@ -232,57 +390,19 @@ void DEMO_Svg::draw()
 	{
 		update();
 
-		//-
+		//----
 
-		//TODO:
-		// nike
-		ofClear(255);
+#ifndef USE_MASK
+		draw_SVG();
+#endif
 
-		//-
+#ifdef USE_MASK
+		draw_Mask();
+#endif
 
-		//blend types
-		//string str;
-		//str += "Press UP/DOWN key\n";
-		//str += "Blend Mode: [" + ofToString(blendMode) + "] " + psBlend.getBlendMode(blendMode);
-		//ofDrawBitmapStringHighlight(str, 20, 30);
-
-		ofPushStyle();
-
-		ofPushMatrix();
-		ofTranslate(rectDgSvg.getX(), rectDgSvg.getY());
-
-		//ofPushMatrix();
-		//ofTranslate(rectDgSvg.getWidth() / 2.f, rectDgSvg.getHeight()/2.0f);
-		ofScale(scale);
-
-		psBlend.draw(img.getTextureReference(), blendMode);
-
-		ofPopMatrix();
-		//ofPopMatrix();
-
-		//-
-
-		if (rectDgSvg.isEditing())
-		{
-			////highlight
-			//ofFill();
-			//int fr = ofGetFrameNum() % 60;
-			//ofSetColor(fr < 30 ? ofColor(255, 16) : (ofColor(0, 16)));
-			//ofDrawRectangle(rectDgSvg);
-
-			//-
-
-			rectDgSvg.setWidth(rSvgBounds.getWidth() * scale);
-			rectDgSvg.setHeight(rSvgBounds.getHeight() * scale);
-
-			//float _ratio = rectDgSvg.getHeight() / rectDgSvg.getHeight();
-			//scale = rectDgSvg.getY() / rSvgBounds.getY();
-		}
-
-		ofPopStyle();
 	}
 
-	//-
+	//----
 
 	if (ShowGui) gui.draw();
 
@@ -305,15 +425,24 @@ void DEMO_Svg::draw()
 void DEMO_Svg::setLinkPalette(vector<ofColor> &p)
 {
 	ofLogNotice(__FUNCTION__);
+
 	palette_TARGET = &p;
 }
 
 //--------------------------------------------------------------
-void DEMO_Svg::keyPressed(int key)
+void DEMO_Svg::keyPressed(ofKeyEventArgs &eventArgs)
 {
+	const int key = eventArgs.key;
+
+	// modifiers
+	bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);
+	bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);
+	bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
+	bool mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
+
 	ofLogNotice(__FUNCTION__) << key;
 
-	if (key == OF_KEY_UP)
+	if (/*key == OF_KEY_UP ||*/ key == '-')
 	{
 		if (blendMode >= 24)
 		{
@@ -324,7 +453,8 @@ void DEMO_Svg::keyPressed(int key)
 			blendMode++;
 		}
 	}
-	if (key == OF_KEY_DOWN || key == ' ')
+
+	else if (/*key == OF_KEY_DOWN || key == ' ' ||*/ key == '+')
 	{
 		if (blendMode <= 0)
 		{

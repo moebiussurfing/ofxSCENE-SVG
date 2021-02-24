@@ -690,9 +690,9 @@ public:
 		psBlendShader.end();
 	}
     
-    string getBlendMode(int blendMode)
+    std::string getBlendMode(int blendMode)
     {
-        string blendName = "no such blend hiii";
+        std::string blendName = "no such blend hiii";
         if (blendMode == 0)
         {
             blendName = "BlendNormal";
