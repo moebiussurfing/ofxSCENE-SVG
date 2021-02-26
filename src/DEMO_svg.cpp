@@ -29,6 +29,9 @@ void DEMO_Svg::setup() {
 	//--
 
 	//TODO:
+	//could add svg file selector
+	
+	//TODO:
 	//should auto get the num of groups
 	//for the momment we need to set manualy the num of groups.
 	//remember to name the the groups as: group1, group2, group3... on Illustrator
@@ -117,12 +120,21 @@ void DEMO_Svg::setup() {
 
 	ofAddListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
 
-	ofxSurfingHelpers::loadGroup(params, path_AppSettings);
-
 	//--
 
 	gui.setup("ofxSCENE-SVG");
 	gui.add(params);
+
+	//--
+
+	startup();
+}
+
+//--------------------------------------------------------------
+void DEMO_Svg::startup() {
+	ofLogNotice(__FUNCTION__);
+
+	ofxSurfingHelpers::loadGroup(params, path_AppSettings);
 }
 
 //--------------------------------------------------------------

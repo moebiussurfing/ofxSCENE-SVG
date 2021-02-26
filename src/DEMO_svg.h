@@ -64,6 +64,7 @@ public:
 
 public:
 	void setup();
+	void startup();
 	void update();
 
 	void draw_SVG();
