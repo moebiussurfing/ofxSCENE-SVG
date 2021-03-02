@@ -607,4 +607,9 @@ void DEMO_Svg::load_SVG(std::string name)
 	}
 	maskFbo.end();
 #endif
+
+	//--
+
+	//load layout
+	rSvg.loadSettings(path_Name, path_Layout, false);
 }
