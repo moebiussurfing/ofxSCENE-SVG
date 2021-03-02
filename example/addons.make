@@ -1,0 +1,3 @@
+ofxGui
+ofxSCENE-SVG
+ofxSurfingHelpers

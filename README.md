@@ -1,58 +1,46 @@
-ofxAddonTemplateCustomApp
+ofxSCENE-SVG
 =============================
 
 # Overview
-**ofxAddonTemplateCustomApp** is an **openFrameworks** addon template for MYSELF.
+**ofxSCENE-SVG** is an **openFrameworks** addon to load and live-colorize an **SVG** file layered by named groups.
+Also blends the **SVG** with a **JPG* file, like an outline B&W lines image.
 
 ## Screenshot
-![image](/readme_images/Capture1.PNG?raw=true "image")
+![image](/readme_images/Capture2.PNG?raw=true "image")
 
 ## Features
-- Customize gui.
-- Basic parameters and app modes.
-- Store/Recall settings.
-- 
-
+- GUI and store/recall settings.
+- Resize and scale using mouse.
+- Different blend modes and transparency.
 
 ## Usage
- 
-### ofApp.h
-```.cpp
-#include "ofxAddonTemplateCustomApp.h"
-ofxAddonTemplateCustomApp myAddon;
-```
-
-### ofApp.cpp
-```.cpp
-ofApp::setup(){
-	ofxAddonTemplateCustomApp.setup();
-}
-
-ofApp::update(){
-	ofxAddonTemplateCustomApp.update();
-}
-
-ofApp::draw(){
-	ofxAddonTemplateCustomApp.draw();
-	ofxAddonTemplateCustomApp.drawGui();
-}
-```
+Look the example.
+On Illustrator: 
+Import your image to be vectorized.  
+Draw all each color mask/shape by hand.  
+Name the groups/layers as: *group1*, *group2*, *group3*... as in the screenshot.  
+Save as **SVG Tiny 1.1**.  
 
 ## Dependencies
-- 
+* [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
+* ofxGui
+
+Already included into *OF_ADDON/libs*. No need to add manually.  
+Look into folders to authorship, original forks, or licenses.  
+* ofxPSBlend
+* ofxScaleDragRect
+* ofxSvg
+* ofxSvgLoader
+
+## TODO:
+* add masked mode.
+* size colors is hardcoded now to my two SVG samples.
 
 ## Tested systems
 - **Windows10** / **VS2017** / **OF ~0.11**
-- **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11**
-
-### TODO/IDEAS
-* 
-
-### Notes
-*
 
 ## Author
-Addon by **@moebiusSurfing**  
+An addon by **@moebiusSurfing**  
 *(ManuMolina). 2020.*
 
 ## License

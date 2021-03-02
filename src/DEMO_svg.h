@@ -27,6 +27,8 @@ Do not include hidden layers or mask, can be problematic.
 #include "ofxAlphaMask.h"
 #endif
 
+#define MAX_PALETTE_COLORS 10
+
 class DEMO_Svg
 {
 	//--
@@ -92,6 +94,12 @@ private:
 	std::string path_Name = "_DEMO_Svg";
 	ofxInteractiveRect rSvg = { "_DEMO_Svg" };
 	std::string path_Layout;
+	
+private:
+	std::vector<ofFile> files;
+	std::vector<std::string> files_Names;
+	void refresh_Files(std::string path);
+	void load_SVG(std::string name);
 
 public:
 	ofParameter<bool> ShowGui{ "Show Gui", true };
@@ -99,6 +107,11 @@ public:
 	ofParameter<bool> DEMO2_Edit{ "Edit DEMO Svg", false };
 	ofParameter<float> DEMO2_Scale{ "Scale", 1, 0.1, 2.0f };
 	ofParameter<float> DEMO2_Alpha{ "Alpha", 1.0f, 0, 1.0f };
+	ofParameter<int> blendMode{ "Blend Type", 1, 0, 24 };
+	ofParameter<std::string> blendModeName{ "Blend Name", "" };
+	ofParameter<int> fileIndex{ "SVG File", 0, 0, 0 };
+	ofParameter<std::string> fileIndexName{ "File Name", "" };
+
 	ofParameterGroup getParams() { return params; }
 
 private:
@@ -147,6 +160,9 @@ public:
 	float getHeight() {
 		return shape.y;
 	}
+	int getNumColors() {
+		return maxNumSvgGroupColors;
+	}
 	void setPaletteColors(vector<ofColor> &palette);//to be used on manual updating mode
 
 	//pointer
@@ -162,11 +178,8 @@ private:
 
 	ofxPSBlend psBlend;
 
-	ofParameter<int> blendMode{ "Blend Type", 1, 0, 24  };
-	ofParameter<std::string> blendModeName{ "Name", "" };
-
 	vector<ofColor> paletteSvg;
-	int maxNumSvgGroupColors = 2;
+	ofParameter<int> maxNumSvgGroupColors{ "Amount Colors", 0, 0, MAX_PALETTE_COLORS };
 
 	glm::vec2 pos{ 0,0 };
 	glm::vec2 shape;

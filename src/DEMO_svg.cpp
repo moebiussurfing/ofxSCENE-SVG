@@ -7,109 +7,26 @@ void DEMO_Svg::setup() {
 	path_Global = "ofxSCENE-SVG/";
 	path_AppSettings = path_Global + "DEMO_Svg.xml";
 
-	//--
-
-	// set the svg file and jpg lines
-
-	// moebius.svg
-	//svg.load(path_Global + "moebius/moebius-giraud.svg");
-	//img.load(path_Global + "moebius/moebius-lines.jpg");
-	//shape = glm::vec2(838, 1080);
-	//maxNumSvgGroupColors = 7;
-
-	// nike.svg
-	svg.load(path_Global + "nike/nike.svg");
-#ifdef USE_MASK
-	img_Mask.load(path_Global + "nike/nike-Mask.jpg");
-#endif
-	img.load(path_Global + "nike/nike.jpg");
-	shape = glm::vec2(1024, 666);
-	maxNumSvgGroupColors = 8;
-
-	//--
-
-	//TODO:
-	//could add svg file selector
-	
-	//TODO:
-	//should auto get the num of groups
-	//for the momment we need to set manualy the num of groups.
-	//remember to name the the groups as: group1, group2, group3... on Illustrator
-	//use SVG 1.1 tiny file format.
-	//shared_ptr<ofxSvgGroup> bGroup = svg.get< ofxSvgGroup>(name.c_str());
-
-	//--
-
-	ofLogNotice(__FUNCTION__) << svg.toString();
-
-	rSvgBounds = svg.getBounds();
-
-	w = rSvgBounds.getWidth();
-	h = rSvgBounds.getHeight();
-
-	//TODO:
-	//scale
-	//svg.getTransformFromSvgMatrix
-	//getTransformFromSvgMatrix(string matrix, ofVec2f& apos, float & scaleX, float & scaleY, float & arotation)
-	//vector< shared_ptr<ofxSvgImage> > trees = svg.getElementsForType< ofxSvgImage>("trees");
-
-	shape = glm::vec2(w, h);
-	//ratio = shape.x / shape.y;
-
-	img.resize(w, h);
-
-#ifdef USE_MASK
-	img_Mask.resize(w, h);
-#endif
-
-	//psBlend.setup(w, h);
-	psBlend.setup(img.getWidth(), img.getHeight());
-
-	//blendMode = 1;//multiply
-
-	paletteSvg.clear();
-	paletteSvg.resize(maxNumSvgGroupColors);
-
-	// draggable rect
-	rSvg.setRect(rSvgBounds.getX(), rSvgBounds.getY(), w, h);//default init
-	rSvg.setLockResize(false);
-	//rSvg.setLockResize(true);
-
 	// b. load settings
-	//rSvg.loadSettings();
+	rSvg.disableEdit();
 	path_Layout = path_Global;
 	rSvg.loadSettings(path_Name, path_Layout, false);
-	rSvg.disableEdit();
-
-	//rSvg.enableEdit();
-
-	//_xx = rSvg.getX() + _pad1;
-	//_yy = rSvg.getY() + _pad1;
 
 	//--
 
-#ifdef USE_MASK
-	srcFbo.allocate(1920, 1080, GL_RGBA);
-	//srcFbo.allocate(w, h, GL_RGBA);
-	srcFbo.begin();
-	{
-		ofClear(0);
-	}
-	srcFbo.end();
-
-	maskFbo.allocate(1920, 1080, GL_RGBA);
-	//maskFbo.allocate(w, h, GL_RGBA);
-	maskFbo.begin();
-	{
-		ofClear(0);
-	}
-	maskFbo.end();
-#endif
+	refresh_Files(path_Global);
 
 	//--
 
 	//blendMode.setSerializable(false);
 	//blendModeName.setSerializable(false);
+
+	blendModeName.setSerializable(false);
+	//fileIndex.setSerializable(false);
+	fileIndexName.setSerializable(false);
+	maxNumSvgGroupColors.setSerializable(false);
+
+	//--
 
 	params.add(DEMO2_Test);
 	params.add(DEMO2_Edit);
@@ -117,6 +34,9 @@ void DEMO_Svg::setup() {
 	params.add(DEMO2_Alpha);
 	params.add(blendMode);
 	params.add(blendModeName);
+	params.add(fileIndex);
+	params.add(fileIndexName);
+	params.add(maxNumSvgGroupColors);
 
 	ofAddListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
 
@@ -135,6 +55,8 @@ void DEMO_Svg::startup() {
 	ofLogNotice(__FUNCTION__);
 
 	ofxSurfingHelpers::loadGroup(params, path_AppSettings);
+
+	//load_SVG("nike");
 }
 
 //--------------------------------------------------------------
@@ -217,6 +139,18 @@ void DEMO_Svg::Changed_Controls(ofAbstractParameter &e)
 	{
 		blendModeName = psBlend.getBlendMode(blendMode);
 	}
+
+	// file
+	else if (name == fileIndex.getName())
+	{
+		if (fileIndex.get() > files_Names.size() - 1) return;
+
+		fileIndexName = files_Names[fileIndex];
+
+		ofLogNotice(__FUNCTION__) << fileIndexName;
+
+		load_SVG(fileIndexName);
+	}
 }
 
 //--------------------------------------------------------------
@@ -240,7 +174,7 @@ void DEMO_Svg::update() {
 		{
 			int szp = palette_TARGET->size();
 
-			for (int i = 0; i < maxNumSvgGroupColors; i++)
+			for (int i = 0; i < maxNumSvgGroupColors && szp > 0; i++)
 			{
 				paletteSvg[i] = (*palette_TARGET)[i % szp];
 			}
@@ -345,7 +279,7 @@ void DEMO_Svg::draw_Mask()
 	//	maskFbo.draw(w, 0);
 	//}
 	//ofPopMatrix();
-}
+	}
 
 #endif
 
@@ -412,22 +346,22 @@ void DEMO_Svg::draw()
 		draw_Mask();
 #endif
 
-	}
+}
 
 	//----
 
 	if (ShowGui) gui.draw();
 
 	//ImGui
-	//ofxImGui::AddParameter(DEMO2_Svg.DEMO2_Test);
-	//if (DEMO2_Svg.DEMO2_Test)
+	//ofxImGui::AddParameter(demoSVG.DEMO2_Test);
+	//if (demoSVG.DEMO2_Test)
 	//{
-	//	ofxImGui::AddParameter(DEMO2_Svg.DEMO2_Edit);
+	//	ofxImGui::AddParameter(demoSVG.DEMO2_Edit);
 	//	//if (ImGui::DragFloat("Scale", &scale, 0.2, 1.0))
-	//	if (ofxImGui::AddParameter(DEMO2_Svg.DEMO2_Scale))
+	//	if (ofxImGui::AddParameter(demoSVG.DEMO2_Scale))
 	//	{
 	//	}
-	//	if (ofxImGui::AddParameter(DEMO2_Svg.DEMO2_Alpha))
+	//	if (ofxImGui::AddParameter(demoSVG.DEMO2_Alpha))
 	//	{
 	//	}
 	//}
@@ -454,7 +388,7 @@ void DEMO_Svg::keyPressed(ofKeyEventArgs &eventArgs)
 
 	ofLogNotice(__FUNCTION__) << key;
 
-	if (/*key == OF_KEY_UP ||*/ key == '-')
+	if (/*key == OF_KEY_UP ||*/ key == '+')
 	{
 		if (blendMode >= 24)
 		{
@@ -466,7 +400,7 @@ void DEMO_Svg::keyPressed(ofKeyEventArgs &eventArgs)
 		}
 	}
 
-	else if (/*key == OF_KEY_DOWN || key == ' ' ||*/ key == '+')
+	else if (/*key == OF_KEY_DOWN || key == ' ' ||*/ key == '-')
 	{
 		if (blendMode <= 0)
 		{
@@ -477,4 +411,200 @@ void DEMO_Svg::keyPressed(ofKeyEventArgs &eventArgs)
 			blendMode--;
 		}
 	}
+}
+
+//--------------------------------------------------------------
+void DEMO_Svg::refresh_Files(std::string path)
+{
+	ofLogNotice(__FUNCTION__) << path;
+	ofxSurfingHelpers::CheckFolder(path);
+
+	ofDirectory dataDirectory(ofToDataPath(path, true));
+
+	//-
+
+	// clear files and filenames vectors
+	files.clear();
+	files_Names.clear();
+	//dataDirectory.allowExt("");
+
+	// load all folder files in one call
+	files = dataDirectory.getFiles();
+
+	if (files.size() < 1) 
+	{
+		ofLogError(__FUNCTION__) << "PATH DIRECTORY EMPTY!";
+		return;
+	}
+
+	//-
+
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		auto _nName = files[i].getBaseName();
+		auto _nFolder = files[i].getAbsolutePath();
+
+		if (std::filesystem::is_directory(_nFolder))
+		{
+			files_Names.push_back(_nName);
+			//ofLogNotice(__FUNCTION__) << files_Names.back();
+		}
+	}
+
+	if (files_Names.size() < 1) 
+	{
+		ofLogError(__FUNCTION__) << "PATH DIRECTORY FORMAT NOT COMPATIBLE!";
+		return;
+	}
+
+	fileIndex.setMax(files_Names.size() - 1);
+	if (fileIndex > files_Names.size() - 1) fileIndex = -1;
+
+	//-
+
+	// workflow
+
+	//TODO:
+	//void to go to 1st...
+	fileIndex = 0;
+
+	// 1. load same position preset
+	// if preset is deleted goes to nextone..
+	// should check names because sorting changes..
+	if (files_Names.size() > 0)
+	{
+		if (fileIndex > files_Names.size() - 1) fileIndex = files_Names.size() - 1;
+		fileIndexName = files_Names[fileIndex];
+		ofLogNotice(__FUNCTION__) << fileIndexName;
+
+		load_SVG(fileIndexName);
+	}
+	else
+	{
+		ofLogError(__FUNCTION__) << "FILE PRESET NOT FOUND!";
+	}
+
+	//// 2. always goes to 1st preset 0
+	////that's because saving re sort the files
+	////and we don't know the position of last saves preset..
+	//if (files_Names.size() > 0)
+	//{
+	//    last_Index_Preset = 0;
+	//    PRESET_Name = files_Names[last_Index_Preset];
+	//    preset_Load(PRESET_Name);
+	//}
+	//else
+	//{
+	//    ofLogError(__FUNCTION__) << "NOT FOUND ANY FILE PRESET!";
+	//}
+
+	//--
+
+	//kit.resize(files_Names.size());
+	//for (int i = 0; i < files_Names.size(); i++)
+	//{
+	//	kit[i] = PRESET_Temp.getPreset(files_Names[i]);
+	//	//log
+	//	ofLogNotice(__FUNCTION__) << "[ " << i << " ] " << files_Names[i];
+	//	for (int c = 0; c < kit[i].palette.size(); c++)
+	//	{
+	//		ofLogNotice(__FUNCTION__) << c << " : " << ofToString(kit[i].palette[c]);
+	//	}
+	//}
+}
+
+//--------------------------------------------------------------
+void DEMO_Svg::load_SVG(std::string name)
+{
+	//initiate
+	svg = ofxSvgLoader();
+	img.clear();
+
+	//--
+
+	// nike.svg
+	svg.load(path_Global + name + "/" + name + ".svg");
+#ifdef USE_MASK
+	img_Mask.load(path_Global + name + "/" + name + "-Mask.jpg");
+#endif
+	img.load(path_Global + name + "/" + name + ".jpg");
+	shape = glm::vec2(img.getWidth(), img.getHeight());
+
+	//TODO: count svg groups/layers
+	//hardcoded workaround
+	if(name=="nike") maxNumSvgGroupColors = 8;//nike
+	else if(name=="moebius") maxNumSvgGroupColors = 7;//moebius
+	else maxNumSvgGroupColors = 4;//default
+
+	//--
+
+	//TODO:
+	//could add svg file selector
+
+	//TODO:
+	//should auto get the num of groups
+	//for the momment we need to set manualy the num of groups.
+	//remember to name the the groups as: group1, group2, group3... on Illustrator
+	//use SVG 1.1 tiny file format.
+	//shared_ptr<ofxSvgGroup> bGroup = svg.get< ofxSvgGroup>(name.c_str());
+
+	//----
+
+	ofLogNotice(__FUNCTION__) << svg.toString();
+
+	rSvgBounds = svg.getBounds();
+
+	w = rSvgBounds.getWidth();
+	h = rSvgBounds.getHeight();
+
+	//TODO:
+	//scale
+	//svg.getTransformFromSvgMatrix
+	//getTransformFromSvgMatrix(string matrix, ofVec2f& apos, float & scaleX, float & scaleY, float & arotation)
+	//vector< shared_ptr<ofxSvgImage> > trees = svg.getElementsForType< ofxSvgImage>("trees");
+
+	shape = glm::vec2(w, h);
+	//ratio = shape.x / shape.y;
+
+	img.resize(w, h);
+
+#ifdef USE_MASK
+	img_Mask.resize(w, h);
+#endif
+
+	//psBlend.setup(w, h);
+	psBlend.setup(img.getWidth(), img.getHeight());
+
+	//blendMode = 1;//multiply
+
+	paletteSvg.clear();
+	paletteSvg.resize(maxNumSvgGroupColors);
+
+	// draggable rect
+	rSvg.setRect(rSvgBounds.getX(), rSvgBounds.getY(), w, h);//default init
+	rSvg.setLockResize(false);
+	//rSvg.setLockResize(true);
+
+	// b. load settings
+	//rSvg.loadSettings();
+	//path_Layout = path_Global;
+	//rSvg.loadSettings(path_Name, path_Layout, false);
+
+	//--
+
+#ifdef USE_MASK
+	srcFbo.allocate(1920, 1080, GL_RGBA);
+	srcFbo.begin();
+	{
+		ofClear(0);
+	}
+	srcFbo.end();
+
+	maskFbo.allocate(1920, 1080, GL_RGBA);
+	maskFbo.begin();
+	{
+		ofClear(0);
+	}
+	maskFbo.end();
+#endif
 }
