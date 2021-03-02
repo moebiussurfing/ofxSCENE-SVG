@@ -23,9 +23,9 @@ On Illustrator:
 4. *Save as* **SVG Tiny 1.1**.  
 5. Put the files following the example path structures.
 
-## Dependencies
-* [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
+## Dependencies* [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * ofxGui
+
 
 Already included into *OF_ADDON/libs*. No need to add manually.  
 Look into folders to authorship, original forks, or licenses.  
