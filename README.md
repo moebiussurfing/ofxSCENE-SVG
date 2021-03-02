@@ -2,8 +2,8 @@ ofxSCENE-SVG
 =============================
 
 # Overview
-**ofxSCENE-SVG** is an **openFrameworks** addon to load and live-colorize an **SVG** file layered by named groups.
-Also blends the **SVG** with a **JPG* file, like an outline B&W lines image.
+**ofxSCENE-SVG** is an **openFrameworks** addon to load and live-colorize an **SVG** file layered by named groups.  
+Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 
 ## Screenshot
 ![image](/readme_images/Capture2.PNG?raw=true "image")
