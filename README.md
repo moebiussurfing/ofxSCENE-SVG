@@ -2,7 +2,7 @@ ofxSCENE-SVG
 =============================
 
 # Overview
-**ofxSCENE-SVG** is an **openFrameworks** addon to load and live-colorize an **SVG** file layered by named groups.  
+An **openFrameworks** addon to load and live-colorize an customized **SVG** file layered by named groups.  
 Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 
 ## Screenshot
@@ -11,7 +11,8 @@ Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 ## Features
 - GUI and store/recall settings.
 - Resize and scale using mouse.
-- Different blend modes and transparency.
+- Different blend modes and transparency.  
+- Selectable file with some limitations.  
 
 ## Usage
 Look the example.  
@@ -23,11 +24,11 @@ On Illustrator:
 4. *Save as* **SVG Tiny 1.1**.  
 5. Put the files following the example path structures.
 
-## Dependencies* [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
+## Dependencies
+* [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * ofxGui
 
-
-Already included into *OF_ADDON/libs*. No need to add manually.  
+Already included into **OF_ADDON/libs**. No need to add manually.  
 Look into folders to authorship, original forks, or licenses.  
 * ofxPSBlend
 * ofxScaleDragRect
@@ -35,8 +36,8 @@ Look into folders to authorship, original forks, or licenses.
 * ofxSvgLoader
 
 ## TODO:
-* add masked mode.
-* size colors is hardcoded now to my two SVG samples.
+* Add masked mode.
+* Size colors is hardcoded now to my two SVG samples.
 
 ## Tested systems
 - **Windows10** / **VS2017** / **OF ~0.11**
