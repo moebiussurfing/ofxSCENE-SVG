@@ -17,12 +17,12 @@ Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 ## Usage
 Look the example.  
 
-On Illustrator: 
+**How to prepare the SVG file on Illustrator:**  
 1. Import your image to be vectorized.  
 2. Draw all each color mask/shape by hand.  
 3. Name the groups/layers as: *group1*, *group2*, *group3*... as in the screenshot.  
 4. *Save as* **SVG Tiny 1.1**.  
-5. Put the files following the example path structures.
+5. Put the files following the example path and filename structures.
 
 ## Dependencies
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  

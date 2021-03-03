@@ -279,7 +279,7 @@ void DEMO_Svg::draw_Mask()
 	//	maskFbo.draw(w, 0);
 	//}
 	//ofPopMatrix();
-	}
+}
 
 #endif
 
@@ -346,7 +346,7 @@ void DEMO_Svg::draw()
 		draw_Mask();
 #endif
 
-}
+	}
 
 	//----
 
@@ -431,7 +431,7 @@ void DEMO_Svg::refresh_Files(std::string path)
 	// load all folder files in one call
 	files = dataDirectory.getFiles();
 
-	if (files.size() < 1) 
+	if (files.size() < 1)
 	{
 		ofLogError(__FUNCTION__) << "PATH DIRECTORY EMPTY!";
 		return;
@@ -451,7 +451,7 @@ void DEMO_Svg::refresh_Files(std::string path)
 		}
 	}
 
-	if (files_Names.size() < 1) 
+	if (files_Names.size() < 1)
 	{
 		ofLogError(__FUNCTION__) << "PATH DIRECTORY FORMAT NOT COMPATIBLE!";
 		return;
@@ -516,7 +516,7 @@ void DEMO_Svg::refresh_Files(std::string path)
 //--------------------------------------------------------------
 void DEMO_Svg::load_SVG(std::string name)
 {
-	//initiate
+	// initiate
 	svg = ofxSvgLoader();
 	img.clear();
 
@@ -532,8 +532,8 @@ void DEMO_Svg::load_SVG(std::string name)
 
 	//TODO: count svg groups/layers
 	//hardcoded workaround
-	if(name=="nike") maxNumSvgGroupColors = 8;//nike
-	else if(name=="moebius") maxNumSvgGroupColors = 7;//moebius
+	if (name == "nike") maxNumSvgGroupColors = 8;//nike
+	else if (name == "moebius") maxNumSvgGroupColors = 7;//moebius
 	else maxNumSvgGroupColors = 4;//default
 
 	//--
@@ -550,7 +550,7 @@ void DEMO_Svg::load_SVG(std::string name)
 
 	//----
 
-	ofLogNotice(__FUNCTION__) << svg.toString();
+	ofLogNotice(__FUNCTION__) << endl << endl << svg.toString();
 
 	rSvgBounds = svg.getBounds();
 
@@ -610,6 +610,8 @@ void DEMO_Svg::load_SVG(std::string name)
 
 	//--
 
-	//load layout
+	// load layout
 	rSvg.loadSettings(path_Name, path_Layout, false);
+
+	setEdit(DEMO2_Edit);
 }
