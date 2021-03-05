@@ -145,13 +145,20 @@ private:
 	float ratio;
 	ofRectangle rSvgBounds;
 
-public:
 	ofxPanel gui;
+public:
 	void setVisible(bool b) {
 		ShowGui = b;
 	}
 	void setVisibleToggle() {
 		ShowGui = !ShowGui;
+	}
+
+	glm::vec2 getPositionTittle() 
+	{
+		ofRectangle r = rSvg.getRect();
+		glm::vec2 p = glm::vec2(r.x + r.getWidth()/2.0, r.y);
+		return p;
 	}
 
 public:
