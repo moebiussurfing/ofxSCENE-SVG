@@ -6,9 +6,8 @@ An **openFrameworks** addon to load and live-colorize an customized **SVG** file
 Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 
 ## Screenshot
-![image](/readme_images/Capture1.PNG?raw=true "image")  
-![image](/readme_images/Capture2.PNG?raw=true "image")  
-![image](/readme_images/Capture3.PNG?raw=true "image")  
+![image](/readme_images/Capture1.jpg?raw=true "image")  
+![image](/readme_images/Capture2.jpg?raw=true "image")  
 
 ## Features
 - GUI and store/recall settings.
