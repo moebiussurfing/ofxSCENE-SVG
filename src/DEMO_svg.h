@@ -117,15 +117,15 @@ private:
 
 public:
 	ofParameter<bool> ShowGui{ "Show Gui", true };
-	ofParameter<bool> DEMO2_Test{ "Enable DEMO Svg", false };
+	ofParameter<bool> DEMO2_Enable{ "Enable DEMO Svg", false };
 	ofParameter<bool> DEMO2_Edit{ "Edit DEMO Svg", false };
 	ofParameter<float> DEMO2_Scale{ "Scale", 1, 0.1, 2.0f };
 	ofParameter<float> DEMO2_Alpha{ "Alpha", 1.0f, 0, 1.0f };
 	ofParameter<int> blendMode{ "Blend Type", 1, 0, 24 };
 	ofParameter<std::string> blendModeName{ "Blend Name", "" };
 	ofParameter<int> fileIndex{ "SVG File", 0, 0, 0 };
-	ofParameter<glm::vec2> position;
 	ofParameter<std::string> fileIndexName{ "File Name", "" };
+	//ofParameter<glm::vec2> position;
 
 	ofParameterGroup getParams() { return params; }
 

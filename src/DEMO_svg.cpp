@@ -8,14 +8,14 @@ void DEMO_Svg::setup() {
 	path_AppSettings = path_Global + "DEMO_Svg.xml";
 
 	// b. load settings
-	rSvg.disableEdit();
+	//rSvg.disableEdit();
 	path_Layout = path_Global;
-	rSvg.loadSettings(path_Name, path_Layout, false);
+	//rSvg.loadSettings(path_Name, path_Layout, false);
 	rSvg.setAllScreenMouse(true);
 
-	ww = ofGetWidth();
-	hh = ofGetHeight();
-	position.set("Positon", glm::vec2(ww / 2, hh / 2), glm::vec2(0, 0), glm::vec2(ww, hh));
+	//ww = ofGetWidth();
+	//hh = ofGetHeight();
+	//position.set("Positon", glm::vec2(ww / 2, hh / 2), glm::vec2(0, 0), glm::vec2(ww, hh));
 
 	//--
 
@@ -24,14 +24,14 @@ void DEMO_Svg::setup() {
 	//--
 
 	//blendMode.setSerializable(false);
-	blendModeName.setSerializable(false);
 	//fileIndex.setSerializable(false);
+	blendModeName.setSerializable(false);
 	fileIndexName.setSerializable(false);
 	maxNumSvgGroupColors.setSerializable(false);
 
 	//--
 
-	params.add(DEMO2_Test);
+	params.add(DEMO2_Enable);
 	params.add(DEMO2_Edit);
 	params.add(DEMO2_Scale);
 	params.add(DEMO2_Alpha);
@@ -61,9 +61,13 @@ void DEMO_Svg::setup() {
 void DEMO_Svg::startup() {
 	ofLogNotice(__FUNCTION__);
 
-	ofxSurfingHelpers::loadGroup(params, path_AppSettings);
+	////TODO: fix startup bad
+	////load_SVG("nike");
+	//rSvg.enableEdit();
+	//rSvg.disableEdit();
 
-	//load_SVG("nike");
+	rSvg.loadSettings(path_Name, path_Layout, false);
+	ofxSurfingHelpers::loadGroup(params, path_AppSettings);
 }
 
 //--------------------------------------------------------------
@@ -121,27 +125,27 @@ void DEMO_Svg::mouseScrolled(ofMouseEventArgs &eventArgs)
 //--------------------------------------------------------------
 void DEMO_Svg::mouseDragged(ofMouseEventArgs &eventArgs)
 {
-	const int &x = eventArgs.x;
-	const int &y = eventArgs.y;
-	ofLogNotice(__FUNCTION__) << x << ", " << y;
+	//const int &x = eventArgs.x;
+	//const int &y = eventArgs.y;
+	//ofLogNotice(__FUNCTION__) << x << ", " << y;
 
-	float xx = x;
-	float yy = y;
+	//float xx = x;
+	//float yy = y;
 
-	////xx = x + rSvg.getWidth() * scale * 1.0;
-	////yy = y + rSvg.getHeight() * scale * 1.0;
+	//////xx = x + rSvg.getWidth() * scale * 1.0;
+	//////yy = y + rSvg.getHeight() * scale * 1.0;
 
-	if (DEMO2_Edit)
-	{
-		float xpre;
-		float ypre;
-		xpre = rSvg.getRectX();
-		ypre = rSvg.getRectY();
+	//if (DEMO2_Edit)
+	//{
+	//	float xpre;
+	//	float ypre;
+	//	xpre = rSvg.getRectX();
+	//	ypre = rSvg.getRectY();
 
-		//rSvg.setPosition(-xx + xpre, -yy + ypre);
+	//	//rSvg.setPosition(-xx + xpre, -yy + ypre);
 
-		//position = glm::vec2(xx, yy);
-	}
+	//	//position = glm::vec2(xx, yy);
+	//}
 }
 
 //--------------------------------------------------------------
@@ -266,10 +270,8 @@ void DEMO_Svg::update() {
 
 		w2 = (rSvgBounds.getWidth() * scale);
 		h2 = (rSvgBounds.getHeight() * scale);
-
 		x2 = rSvg.getX();
 		y2 = rSvg.getY();
-
 		rSvg.setWidth(w2);
 		rSvg.setHeight(h2);
 
@@ -282,7 +284,7 @@ void DEMO_Svg::update() {
 //--------------------------------------------------------------
 void DEMO_Svg::update_Mask()
 {
-	if (enable_Mask)
+	//if (enable_Mask)
 	{
 		srcFbo.begin();
 		{
@@ -363,7 +365,7 @@ void DEMO_Svg::draw_SVG()
 //--------------------------------------------------------------
 void DEMO_Svg::draw()
 {
-	if (DEMO2_Test)
+	if (DEMO2_Enable)
 	{
 		update();
 
@@ -601,16 +603,16 @@ void DEMO_Svg::load_SVG(std::string name)
 #ifdef USE_MASK
 	//if (enable_Mask)
 	{
-		srcFbo.allocate(w, h, GL_RGBA);
 		//srcFbo.allocate(1920, 1080, GL_RGBA);
+		srcFbo.allocate(w, h, GL_RGBA);
 		srcFbo.begin();
 		{
 			ofClear(0);
 		}
 		srcFbo.end();
 
-		maskFbo.allocate(w, h, GL_RGBA);
 		//maskFbo.allocate(1920, 1080, GL_RGBA);
+		maskFbo.allocate(w, h, GL_RGBA);
 		maskFbo.begin();
 		{
 			ofClear(0);
@@ -621,8 +623,15 @@ void DEMO_Svg::load_SVG(std::string name)
 
 	//--
 
-	// load layout
+	//// load layout
 	rSvg.loadSettings(path_Name, path_Layout, false);
+	//setEdit(DEMO2_Edit);
 
-	setEdit(DEMO2_Edit);
+	//fix workaroung for startup bug
+	w2 = (rSvgBounds.getWidth() * scale);
+	h2 = (rSvgBounds.getHeight() * scale);
+	x2 = rSvg.getX();
+	y2 = rSvg.getY();
+	rSvg.setWidth(w2);
+	rSvg.setHeight(h2);
 }
