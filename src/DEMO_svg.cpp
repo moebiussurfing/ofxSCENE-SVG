@@ -12,6 +12,10 @@ void DEMO_Svg::setup() {
 	path_Layout = path_Global;
 	rSvg.loadSettings(path_Name, path_Layout, false);
 
+	ww = ofGetWidth();
+	hh = ofGetHeight();
+	position.set("Positon", glm::vec2(ww / 2, hh / 2), glm::vec2(0, 0), glm::vec2(ww, hh));
+
 	//--
 
 	refresh_Files(path_Global);
@@ -19,8 +23,6 @@ void DEMO_Svg::setup() {
 	//--
 
 	//blendMode.setSerializable(false);
-	//blendModeName.setSerializable(false);
-
 	blendModeName.setSerializable(false);
 	//fileIndex.setSerializable(false);
 	fileIndexName.setSerializable(false);
@@ -37,6 +39,10 @@ void DEMO_Svg::setup() {
 	params.add(fileIndex);
 	params.add(fileIndexName);
 	params.add(maxNumSvgGroupColors);
+#ifdef USE_MASK
+	params.add(enable_Mask);
+#endif
+	//params.add(position);
 
 	ofAddListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
 
@@ -97,13 +103,43 @@ void DEMO_Svg::mouseScrolled(ofMouseEventArgs &eventArgs)
 	const int &y = eventArgs.y;
 	const float &scrollX = eventArgs.scrollX;
 	const float &scrollY = eventArgs.scrollY;
+
 	ofLogNotice(__FUNCTION__) << "scrollX: " << scrollX << "  scrollY: " << scrollY;
 
 	if (DEMO2_Edit)
 	{
-		if (rSvg.inside(glm::vec2(x, y)))//zoom 
+		// zoom 
+		//if (rSvg.inside(glm::vec2(x, y))) // inside only but translated when rescaled
+		{
 			if (scrollY == 1) DEMO2_Scale += 0.025f;
 			else if (scrollY == -1) DEMO2_Scale -= 0.025f;
+		}
+	}
+}
+
+//--------------------------------------------------------------
+void DEMO_Svg::mouseDragged(ofMouseEventArgs &eventArgs)
+{
+	const int &x = eventArgs.x;
+	const int &y = eventArgs.y;
+	ofLogNotice(__FUNCTION__) << x << ", " << y;
+
+	float xx = x;
+	float yy = y;
+
+	////xx = x + rSvg.getWidth() * scale * 1.0;
+	////yy = y + rSvg.getHeight() * scale * 1.0;
+
+	if (DEMO2_Edit)
+	{
+		float xpre;
+		float ypre;
+		xpre = rSvg.getRectX();
+		ypre = rSvg.getRectY();
+
+		//rSvg.setPosition(-xx + xpre, -yy + ypre);
+
+		//position = glm::vec2(xx, yy);
 	}
 }
 
@@ -183,6 +219,7 @@ void DEMO_Svg::update() {
 		//--
 
 		// assign fill color to svg groups
+		// svg file must be named corrently as group1, group2, group3,...
 
 		if (paletteSvg.size() != 0)
 		{
@@ -244,52 +281,45 @@ void DEMO_Svg::update() {
 //--------------------------------------------------------------
 void DEMO_Svg::update_Mask()
 {
-	srcFbo.begin();
+	if (enable_Mask)
 	{
-		ofClear(0);
-		draw_SVG();
-	}
-	srcFbo.end();
+		srcFbo.begin();
+		{
+			ofClear(0);
+			draw_SVG();
+		}
+		srcFbo.end();
 
-	maskFbo.begin();
-	{
-		ofClear(0);
-		ofFill();
-		img_Mask.draw(x2, y2, w2, h2);
+		maskFbo.begin();
+		{
+			ofClear(0);
+			ofFill();
+			img_Mask.draw(x2, y2, w2, h2);
+		}
+		maskFbo.end();
 	}
-	maskFbo.end();
 }
 
 //--------------------------------------------------------------
 void DEMO_Svg::draw_Mask()
 {
-	// srcFbo maskFbo
+	//ofPushMatrix();
+	//ofTranslate(-position.get().x, -position.get().y);
+
+	// srcFbo/maskFbo
 	ofSetColor(255, 255);
 	alphaMask.begin(maskFbo.getTexture());
 	{
-		srcFbo.draw(0, 0, w, h);
+		float ratio = w / h;
+		srcFbo.draw(0, 0, ofGetWidth(), ofGetWidth() / ratio);
+		//srcFbo.draw(-position.get().x, -position.get().y, ofGetWidth(), ofGetWidth() / ratio);
 	}
 	alphaMask.end();
-
-	//previews
-	//ofPushMatrix();
-	//{
-	//	ofScale(scale, scale);
-	//	srcFbo.draw(0, 0);
-	//	maskFbo.draw(w, 0);
-	//}
+	
 	//ofPopMatrix();
 }
 
 #endif
-
-////--------------------------------------------------------------
-//void DEMO_Svg::draw(glm::vec2 _pos) //force pos
-//{
-//	pos = _pos;
-//	rSvg.setPosition(pos.x, pos.y);
-//	draw();
-//}
 
 //--------------------------------------------------------------
 void DEMO_Svg::draw_SVG()
@@ -343,7 +373,14 @@ void DEMO_Svg::draw()
 #endif
 
 #ifdef USE_MASK
-		draw_Mask();
+		if (enable_Mask)
+		{
+			draw_Mask();
+		}
+		else
+		{
+			draw_SVG();
+		}
 #endif
 
 	}
@@ -351,20 +388,6 @@ void DEMO_Svg::draw()
 	//----
 
 	if (ShowGui) gui.draw();
-
-	//ImGui
-	//ofxImGui::AddParameter(demoSVG.DEMO2_Test);
-	//if (demoSVG.DEMO2_Test)
-	//{
-	//	ofxImGui::AddParameter(demoSVG.DEMO2_Edit);
-	//	//if (ImGui::DragFloat("Scale", &scale, 0.2, 1.0))
-	//	if (ofxImGui::AddParameter(demoSVG.DEMO2_Scale))
-	//	{
-	//	}
-	//	if (ofxImGui::AddParameter(demoSVG.DEMO2_Alpha))
-	//	{
-	//	}
-	//}
 }
 
 //--------------------------------------------------------------
@@ -483,34 +506,6 @@ void DEMO_Svg::refresh_Files(std::string path)
 	{
 		ofLogError(__FUNCTION__) << "FILE PRESET NOT FOUND!";
 	}
-
-	//// 2. always goes to 1st preset 0
-	////that's because saving re sort the files
-	////and we don't know the position of last saves preset..
-	//if (files_Names.size() > 0)
-	//{
-	//    last_Index_Preset = 0;
-	//    PRESET_Name = files_Names[last_Index_Preset];
-	//    preset_Load(PRESET_Name);
-	//}
-	//else
-	//{
-	//    ofLogError(__FUNCTION__) << "NOT FOUND ANY FILE PRESET!";
-	//}
-
-	//--
-
-	//kit.resize(files_Names.size());
-	//for (int i = 0; i < files_Names.size(); i++)
-	//{
-	//	kit[i] = PRESET_Temp.getPreset(files_Names[i]);
-	//	//log
-	//	ofLogNotice(__FUNCTION__) << "[ " << i << " ] " << files_Names[i];
-	//	for (int c = 0; c < kit[i].palette.size(); c++)
-	//	{
-	//		ofLogNotice(__FUNCTION__) << c << " : " << ofToString(kit[i].palette[c]);
-	//	}
-	//}
 }
 
 //--------------------------------------------------------------
@@ -532,9 +527,19 @@ void DEMO_Svg::load_SVG(std::string name)
 
 	//TODO: count svg groups/layers
 	//hardcoded workaround
-	if (name == "nike") maxNumSvgGroupColors = 8;//nike
-	else if (name == "moebius") maxNumSvgGroupColors = 7;//moebius
-	else maxNumSvgGroupColors = 4;//default
+	if (name == "nike")
+	{
+		maxNumSvgGroupColors = 8;//nike
+	}
+	else if (name == "moebius")
+	{
+		maxNumSvgGroupColors = 7;//moebius
+		enable_Mask = false;//no mask for this svg
+	}
+	else
+	{
+		maxNumSvgGroupColors = 4;//default
+	}
 
 	//--
 
@@ -593,19 +598,24 @@ void DEMO_Svg::load_SVG(std::string name)
 	//--
 
 #ifdef USE_MASK
-	srcFbo.allocate(1920, 1080, GL_RGBA);
-	srcFbo.begin();
+	//if (enable_Mask)
 	{
-		ofClear(0);
-	}
-	srcFbo.end();
+		srcFbo.allocate(w, h, GL_RGBA);
+		//srcFbo.allocate(1920, 1080, GL_RGBA);
+		srcFbo.begin();
+		{
+			ofClear(0);
+		}
+		srcFbo.end();
 
-	maskFbo.allocate(1920, 1080, GL_RGBA);
-	maskFbo.begin();
-	{
-		ofClear(0);
+		maskFbo.allocate(w, h, GL_RGBA);
+		//maskFbo.allocate(1920, 1080, GL_RGBA);
+		maskFbo.begin();
+		{
+			ofClear(0);
+		}
+		maskFbo.end();
 	}
-	maskFbo.end();
 #endif
 
 	//--

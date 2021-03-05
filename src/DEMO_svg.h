@@ -2,10 +2,15 @@
 
 #include "ofMain.h"
 
+//
+// TODO:
+//
+// * must sync/reference mouse drag/rectangle etc. Now is no referenced to the mouse point
+
 
 /*
 
-For the momment we need to set manually the num of groups.
+For the momment we need to set manually the expected number of groups on the SVG.
 We must remember to name the the groups as:
 group1, group2, group3... on Illustrator
 Use SVG 1.1 Tiny file format.
@@ -15,14 +20,15 @@ Do not include hidden layers or mask, can be problematic.
 */
 
 
+// OPTIONAL
+#define USE_MASK
+
+
 #include "ofxSvgLoader.h"
 #include "ofxPSBlend.h"
 #include "ofxInteractiveRect.h" 
 #include "ofxGui.h"
 #include "ofxSurfingHelpers.h"
-
-//#define USE_MASK
-
 #ifdef USE_MASK
 #include "ofxAlphaMask.h"
 #endif
@@ -34,12 +40,14 @@ class DEMO_Svg
 	//--
 
 #ifdef USE_MASK
-public:
+//public:
+private:
 	ofFbo srcFbo;
 	ofFbo maskFbo;
 	ofxAlphaMask alphaMask;
 	void update_Mask();
 	void draw_Mask();
+	ofParameter<bool> enable_Mask{ "Enable Mask", false};
 #endif
 
 	//-
@@ -48,9 +56,9 @@ public:
 	DEMO_Svg()
 	{
 		setup();
+		ofAddListener(ofEvents().mouseDragged, this, &DEMO_Svg::mouseDragged);
 		ofAddListener(ofEvents().mouseScrolled, this, &DEMO_Svg::mouseScrolled);
 		ofAddListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
-
 	};
 
 	~DEMO_Svg()
@@ -58,6 +66,7 @@ public:
 		ofRemoveListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
 		rSvg.saveSettings(path_Name, path_Layout, false);
 		ofxSurfingHelpers::saveGroup(params, path_AppSettings);
+		ofRemoveListener(ofEvents().mouseDragged, this, &DEMO_Svg::mouseDragged);
 		ofRemoveListener(ofEvents().mouseScrolled, this, &DEMO_Svg::mouseScrolled);
 		ofRemoveListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
 	};
@@ -78,6 +87,8 @@ public:
 	//void keyPressed(int key);
 	void keyPressed(ofKeyEventArgs &eventArgs);
 	void mouseScrolled(ofMouseEventArgs &eventArgs);
+	void mouseDragged(ofMouseEventArgs &eventArgs);
+	//void mousePressed(ofMouseEventArgs &eventArgs);
 
 	//--
 
@@ -85,6 +96,9 @@ private:
 	float w, h;
 	float w2, h2;
 	float x2, y2;
+	//window
+	float ww;
+	float hh;
 
 private:
 	std::string path_AppSettings;
@@ -110,6 +124,7 @@ public:
 	ofParameter<int> blendMode{ "Blend Type", 1, 0, 24 };
 	ofParameter<std::string> blendModeName{ "Blend Name", "" };
 	ofParameter<int> fileIndex{ "SVG File", 0, 0, 0 };
+	ofParameter<glm::vec2> position;
 	ofParameter<std::string> fileIndexName{ "File Name", "" };
 
 	ofParameterGroup getParams() { return params; }

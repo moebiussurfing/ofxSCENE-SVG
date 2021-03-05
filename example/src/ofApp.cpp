@@ -14,6 +14,8 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+	if (palette.size() > 0) ofClear(palette[0]);
+
 	demoSVG.draw();
 
 	ofDrawBitmapStringHighlight("PRESS SPACE TO RANDOMIZE PALETTE COLORS FROM SVG FILE", 10, ofGetHeight() - 15);
@@ -22,7 +24,7 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::randomizePalette() {
 	palette.clear();
-	palette.resize(demoSVG.getNumColors());//same amount of colors of the SVG file 
+	palette.resize(demoSVG.getNumColors());// same amount of colors of the SVG file 
 
 	for (auto &c : palette) {
 		c.set(ofRandom(255), ofRandom(255), ofRandom(255));
