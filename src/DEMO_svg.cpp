@@ -11,6 +11,7 @@ void DEMO_Svg::setup() {
 	rSvg.disableEdit();
 	path_Layout = path_Global;
 	rSvg.loadSettings(path_Name, path_Layout, false);
+	rSvg.setAllScreenMouse(true);
 
 	ww = ofGetWidth();
 	hh = ofGetHeight();

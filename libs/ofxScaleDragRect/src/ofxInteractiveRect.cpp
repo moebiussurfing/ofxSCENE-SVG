@@ -327,11 +327,12 @@ void ofxInteractiveRect::mouseMoved(ofMouseEventArgs & mouse)
 //--------------------------------------------------------------
 void ofxInteractiveRect::mousePressed(ofMouseEventArgs & mouse)
 {
-    
 	mousePrev = mouse;
 	bPressed = true;
-    bIsOver = inside(mouse.x, mouse.y);
-    
+
+	if (!bAllScreenMouse) bIsOver = inside(mouse.x, mouse.y);
+	else bIsOver = true;
+
     bLeft = false;
     bRight = false;
     bUp = false;

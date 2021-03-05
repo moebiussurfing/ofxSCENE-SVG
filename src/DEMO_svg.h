@@ -40,14 +40,14 @@ class DEMO_Svg
 	//--
 
 #ifdef USE_MASK
-//public:
+public:
+	ofParameter<bool> enable_Mask{ "Enable Mask", false};
 private:
 	ofFbo srcFbo;
 	ofFbo maskFbo;
 	ofxAlphaMask alphaMask;
 	void update_Mask();
 	void draw_Mask();
-	ofParameter<bool> enable_Mask{ "Enable Mask", false};
 #endif
 
 	//-
