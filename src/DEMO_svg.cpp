@@ -43,6 +43,7 @@ void DEMO_Svg::setup() {
 #ifdef USE_MASK
 	params.add(enable_Mask);
 #endif
+	params.add(keys);
 	//params.add(position);
 
 	ofAddListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
@@ -404,6 +405,8 @@ void DEMO_Svg::setLinkPalette(vector<ofColor> &p)
 //--------------------------------------------------------------
 void DEMO_Svg::keyPressed(ofKeyEventArgs &eventArgs)
 {
+	if (!keys) { return; }
+
 	const int key = eventArgs.key;
 
 	// modifiers

@@ -33,7 +33,7 @@ Do not include hidden layers or mask, can be problematic.
 #include "ofxAlphaMask.h"
 #endif
 
-#define MAX_PALETTE_COLORS 10
+#define MAX_PALETTE_COLORS 20
 
 class DEMO_Svg
 {
@@ -41,7 +41,7 @@ class DEMO_Svg
 
 #ifdef USE_MASK
 public:
-	ofParameter<bool> enable_Mask{ "Enable Mask", false};
+	ofParameter<bool> enable_Mask{ "Enable Mask", false };
 private:
 	ofFbo srcFbo;
 	ofFbo maskFbo;
@@ -72,6 +72,13 @@ public:
 	};
 
 	//--
+
+public:
+	void setEnableKeys(bool b) {
+		//keys = b;
+		if (b)ofAddListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
+		else ofRemoveListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
+	};
 
 public:
 	void setup();
@@ -108,7 +115,7 @@ private:
 	std::string path_Name = "_DEMO_Svg";
 	ofxInteractiveRect rSvg = { "_DEMO_Svg" };
 	std::string path_Layout;
-	
+
 private:
 	std::vector<ofFile> files;
 	std::vector<std::string> files_Names;
@@ -116,6 +123,7 @@ private:
 	void load_SVG(std::string name);
 
 public:
+	ofParameter<bool> keys{ "Enable Keys", true };
 	ofParameter<bool> ShowGui{ "Show Gui", true };
 	ofParameter<bool> DEMO2_Enable{ "Enable DEMO Svg", false };
 	ofParameter<bool> DEMO2_Edit{ "Edit DEMO Svg", false };
@@ -154,10 +162,10 @@ public:
 		ShowGui = !ShowGui;
 	}
 
-	glm::vec2 getPositionTittle() 
+	glm::vec2 getPositionTittle()
 	{
 		ofRectangle r = rSvg.getRect();
-		glm::vec2 p = glm::vec2(r.x + r.getWidth()/2.0, r.y);
+		glm::vec2 p = glm::vec2(r.x + r.getWidth() / 2.0, r.y);
 		return p;
 	}
 
