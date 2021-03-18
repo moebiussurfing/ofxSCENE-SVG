@@ -336,7 +336,7 @@ void DEMO_Svg::draw_SVG()
 
 	//TODO:
 	// nike
-	ofClear(255);
+	ofClear(255);//white bg
 
 	//-
 

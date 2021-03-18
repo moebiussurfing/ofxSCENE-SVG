@@ -153,6 +153,7 @@ private:
 	float ratio;
 	ofRectangle rSvgBounds;
 
+public:
 	ofxPanel gui;
 public:
 	void setVisible(bool b) {
