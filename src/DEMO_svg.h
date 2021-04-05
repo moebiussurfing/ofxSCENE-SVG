@@ -69,6 +69,7 @@ public:
 		ofRemoveListener(ofEvents().mouseDragged, this, &DEMO_Svg::mouseDragged);
 		ofRemoveListener(ofEvents().mouseScrolled, this, &DEMO_Svg::mouseScrolled);
 		ofRemoveListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
+		ofRemoveListener(ofEvents().keyReleased, this, &DEMO_Svg::keyReleased);
 	};
 
 	//--
@@ -76,8 +77,15 @@ public:
 public:
 	void setEnableKeys(bool b) {
 		//keys = b;
-		if (b)ofAddListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
-		else ofRemoveListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
+		if (b) {
+			ofAddListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
+			ofAddListener(ofEvents().keyReleased, this, &DEMO_Svg::keyReleased);
+		}
+		else
+		{
+			ofRemoveListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
+			ofRemoveListener(ofEvents().keyReleased, this, &DEMO_Svg::keyReleased);
+		}
 	};
 
 public:
@@ -93,6 +101,7 @@ public:
 public:
 	//void keyPressed(int key);
 	void keyPressed(ofKeyEventArgs &eventArgs);
+	void keyReleased(ofKeyEventArgs &eventArgs);
 	void mouseScrolled(ofMouseEventArgs &eventArgs);
 	void mouseDragged(ofMouseEventArgs &eventArgs);
 	//void mousePressed(ofMouseEventArgs &eventArgs);
@@ -133,6 +142,7 @@ public:
 	ofParameter<std::string> blendModeName{ "Blend Name", "" };
 	ofParameter<int> fileIndex{ "SVG File", 0, 0, 0 };
 	ofParameter<std::string> fileIndexName{ "File Name", "" };
+	ofParameter<bool> DEMO2_BgWhite{ "Bg White", false };
 	//ofParameter<glm::vec2> position;
 
 	ofParameterGroup getParams() { return params; }
@@ -161,6 +171,15 @@ public:
 	}
 	void setVisibleToggle() {
 		ShowGui = !ShowGui;
+		if (!DEMO2_Enable && ShowGui) DEMO2_Enable = true;
+
+	}
+	void reset() {
+		DEMO2_Scale = 1;
+		DEMO2_Alpha = 0.5f;
+		blendMode = 4;
+		//rSvg.loadSettings(path_Name, path_Layout, false);
+		rSvg.set(glm::vec2(200, 200), 800, 400);
 	}
 
 	glm::vec2 getPositionTittle()
@@ -214,6 +233,8 @@ private:
 
 	glm::vec2 pos{ 0,0 };
 	glm::vec2 shape;
+
+	bool bModKey = false;
 
 	//--------------------------------------------------------------
 	void refresh_Gui_Layout()

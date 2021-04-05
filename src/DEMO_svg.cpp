@@ -42,6 +42,7 @@ void DEMO_Svg::setup() {
 	params.add(maxNumSvgGroupColors);
 #ifdef USE_MASK
 	params.add(enable_Mask);
+	params.add(DEMO2_BgWhite);
 #endif
 	params.add(keys);
 	//params.add(position);
@@ -110,7 +111,7 @@ void DEMO_Svg::mouseScrolled(ofMouseEventArgs &eventArgs)
 	const float &scrollX = eventArgs.scrollX;
 	const float &scrollY = eventArgs.scrollY;
 
-	ofLogNotice(__FUNCTION__) << "scrollX: " << scrollX << "  scrollY: " << scrollY;
+	ofLogVerbose(__FUNCTION__) << "scrollX: " << scrollX << "  scrollY: " << scrollY;
 
 	if (DEMO2_Edit)
 	{
@@ -179,13 +180,15 @@ void DEMO_Svg::Changed_Controls(ofAbstractParameter &e)
 	// blend
 	else if (name == blendMode.getName())
 	{
+		blendMode = ofClamp(blendMode, 0, 24);
 		blendModeName = psBlend.getBlendMode(blendMode);
 	}
 
 	// file
 	else if (name == fileIndex.getName())
 	{
-		if (fileIndex.get() > files_Names.size() - 1) return;
+		fileIndex = ofClamp(fileIndex, 0, 1);
+		//if (fileIndex.get() > files_Names.size() - 1) return;
 
 		fileIndexName = files_Names[fileIndex];
 
@@ -319,7 +322,7 @@ void DEMO_Svg::draw_Mask()
 		//srcFbo.draw(-position.get().x, -position.get().y, ofGetWidth(), ofGetWidth() / ratio);
 	}
 	alphaMask.end();
-	
+
 	//ofPopMatrix();
 }
 
@@ -336,7 +339,7 @@ void DEMO_Svg::draw_SVG()
 
 	//TODO:
 	// nike
-	ofClear(255);//white bg
+	if (fileIndex == 1) ofClear(255);//white bg
 
 	//-
 
@@ -440,6 +443,23 @@ void DEMO_Svg::keyPressed(ofKeyEventArgs &eventArgs)
 			blendMode--;
 		}
 	}
+
+	//else if (key == OF_KEY_CONTROL)
+	//{
+	//	bModKey = true;
+	//	setEdit(bModKey);
+	//}
+}
+//--------------------------------------------------------------
+void DEMO_Svg::keyReleased(ofKeyEventArgs &eventArgs)
+{
+	//const int key = eventArgs.key;
+
+	//if (key == OF_KEY_CONTROL)
+	//{
+	//	bModKey = false;
+	//	setEdit(bModKey);
+	//}
 }
 
 //--------------------------------------------------------------
@@ -526,7 +546,8 @@ void DEMO_Svg::load_SVG(std::string name)
 	// nike.svg
 	svg.load(path_Global + name + "/" + name + ".svg");
 #ifdef USE_MASK
-	img_Mask.load(path_Global + name + "/" + name + "-Mask.jpg");
+	img_Mask.load(path_Global + name + "/" + name + "_Mask.jpg");
+	//img_Mask.load(path_Global + name + "/" + name + "-Mask.jpg");
 #endif
 	img.load(path_Global + name + "/" + name + ".jpg");
 	shape = glm::vec2(img.getWidth(), img.getHeight());
