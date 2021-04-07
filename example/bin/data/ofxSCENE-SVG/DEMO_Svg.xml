@@ -1,12 +1,13 @@
 {
     "ofxSCENE-SVG": {
-        "Alpha": "0.362245",
+        "Alpha": "0.478",
+        "Bg_White": "0",
         "Blend_Type": "4",
-        "Edit_DEMO_Svg": "1",
+        "Edit_DEMO_Svg": "0",
         "Enable_DEMO_Svg": "1",
-        "Enable_Keys": "1",
-        "Enable_Mask": "1",
+        "Enable_Keys": "0",
+        "Enable_Mask": "0",
         "SVG_File": "1",
-        "Scale": "0.655612"
+        "Scale": "0.7"
     }
 }
