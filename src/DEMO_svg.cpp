@@ -8,10 +8,10 @@ void DEMO_Svg::setup() {
 	path_AppSettings = path_Global + "DEMO_Svg.xml";
 
 	// b. load settings
-	//rSvg.disableEdit();
+	//rectangle_SVG.disableEdit();
 	path_Layout = path_Global;
-	//rSvg.loadSettings(path_Name, path_Layout, false);
-	rSvg.setAllScreenMouse(true);
+	//rectangle_SVG.loadSettings(path_Name, path_Layout, false);
+	rectangle_SVG.setAllScreenMouse(true);
 
 	//ww = ofGetWidth();
 	//hh = ofGetHeight();
@@ -29,12 +29,20 @@ void DEMO_Svg::setup() {
 	fileIndexName.setSerializable(false);
 	maxNumSvgGroupColors.setSerializable(false);
 
+	//positionCanvas.set("Position", glm::vec2(30, 30), glm::vec2(0, 0), glm::vec2(1920, 1080));
+	//shapeCanvas.set("Shape", glm::vec2(30, 30), glm::vec2(0, 0), glm::vec2(1920, 1080));
+
 	//--
 
-	params.add(DEMO2_Enable);
-	params.add(DEMO2_Edit);
-	params.add(DEMO2_Scale);
-	params.add(DEMO2_Alpha);
+	// control params for callback
+
+	bEdit.setSerializable(false);
+	bReset.setSerializable(false);
+
+	//params.add(positionCanvas);
+	//params.add(shapeCanvas);
+	params.add(bEnable);
+	params.add(alphaSvg);
 	params.add(blendMode);
 	params.add(blendModeName);
 	params.add(fileIndex);
@@ -42,12 +50,25 @@ void DEMO_Svg::setup() {
 	params.add(maxNumSvgGroupColors);
 #ifdef USE_MASK
 	params.add(enable_Mask);
-	params.add(DEMO2_BgWhite);
+	params.add(bBgWhite);
 #endif
-	params.add(keys);
+
+	params_Box.add(bEdit);
+	params_Box.add(scaleSvg);
+	params_Rectangle.add(xRect);
+	params_Rectangle.add(yRect);
+	params_Rectangle.add(wRect);
+	params_Rectangle.add(hRect);
+	params_Box.add(params_Rectangle);
+	params_Box.add(bDrawBorder);
+	params.add(params_Box);
+
+	params.add(bKeys);
+	params.add(bReset);
 	//params.add(position);
 
 	ofAddListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
+	ofAddListener(params_Rectangle.parameterChangedE(), this, &DEMO_Svg::Changed_Rectangle);
 
 	//--
 
@@ -63,13 +84,12 @@ void DEMO_Svg::setup() {
 void DEMO_Svg::startup() {
 	ofLogNotice(__FUNCTION__);
 
-	////TODO: fix startup bad
-	////load_SVG("nike");
-	//rSvg.enableEdit();
-	//rSvg.disableEdit();
+	reset();
 
-	rSvg.loadSettings(path_Name, path_Layout, false);
+	rectangle_SVG.loadSettings(path_Name, path_Layout, false);
 	ofxSurfingHelpers::loadGroup(params, path_AppSettings);
+
+	rectangle_SVG.disableEdit();
 }
 
 //--------------------------------------------------------------
@@ -113,13 +133,13 @@ void DEMO_Svg::mouseScrolled(ofMouseEventArgs &eventArgs)
 
 	ofLogVerbose(__FUNCTION__) << "scrollX: " << scrollX << "  scrollY: " << scrollY;
 
-	if (DEMO2_Edit)
+	if (bEdit)
 	{
 		// zoom 
-		//if (rSvg.inside(glm::vec2(x, y))) // inside only but translated when rescaled
+		//if (rectangle_SVG.inside(glm::vec2(x, y))) // inside only but translated when rescaled
 		{
-			if (scrollY == 1) DEMO2_Scale += 0.025f;
-			else if (scrollY == -1) DEMO2_Scale -= 0.025f;
+			if (scrollY == 1) scaleSvg += 0.025f;
+			else if (scrollY == -1) scaleSvg -= 0.025f;
 		}
 	}
 }
@@ -134,24 +154,24 @@ void DEMO_Svg::mouseDragged(ofMouseEventArgs &eventArgs)
 	//float xx = x;
 	//float yy = y;
 
-	//////xx = x + rSvg.getWidth() * scale * 1.0;
-	//////yy = y + rSvg.getHeight() * scale * 1.0;
+	//////xx = x + rectangle_SVG.getWidth() * scale * 1.0;
+	//////yy = y + rectangle_SVG.getHeight() * scale * 1.0;
 
-	//if (DEMO2_Edit)
+	//if (bEdit)
 	//{
 	//	float xpre;
 	//	float ypre;
-	//	xpre = rSvg.getRectX();
-	//	ypre = rSvg.getRectY();
+	//	xpre = rectangle_SVG.getRectX();
+	//	ypre = rectangle_SVG.getRectY();
 
-	//	//rSvg.setPosition(-xx + xpre, -yy + ypre);
+	//	//rectangle_SVG.setPosition(-xx + xpre, -yy + ypre);
 
 	//	//position = glm::vec2(xx, yy);
 	//}
 }
 
 //--------------------------------------------------------------
-void DEMO_Svg::Changed_Controls(ofAbstractParameter &e)
+void DEMO_Svg::Changed_Rectangle(ofAbstractParameter &e)
 {
 	std::string name = e.getName();
 
@@ -163,18 +183,87 @@ void DEMO_Svg::Changed_Controls(ofAbstractParameter &e)
 
 	//----
 
+	else if (name == xRect.getName())
+	{
+		rectangle_SVG.setX(xRect);
+	}
+	else if (name == yRect.getName())
+	{
+		rectangle_SVG.setY(yRect);
+	}
+
+	else if (name == wRect.getName())
+	{
+		rectangle_SVG.setWidth(wRect);
+
+		hRect = wRect * ratioSource;
+
+		scaleSvg = wRect / rSvgBounds.getWidth();
+	}
+	else if (name == hRect.getName())
+	{
+		rectangle_SVG.setHeight(hRect);
+		//can be controlled by height!
+	}
+}
+
+//--------------------------------------------------------------
+void DEMO_Svg::Changed_Controls(ofAbstractParameter &e)
+{
+	std::string name = e.getName();
+
+	if (name != bEnable.getName()) { // ??
+		ofLogNotice(__FUNCTION__) << name << " : " << e;
+	}
+
+	//----
+
+	if (false) {}
+
+	//----
+
 	// demo2 svg
-	else if (name == DEMO2_Edit.getName())
+	else if (name == bEnable.getName())
 	{
-		setEdit(DEMO2_Edit);
+		// workflow
+		if (!bEnable)
+		{
+			bEdit = false;
+			//setEdit(bEdit);
+		}
 	}
-	else if (name == DEMO2_Scale.getName())
+	else if (name == bEdit.getName())
 	{
-		setScale(DEMO2_Scale);
+		setEdit(bEdit);
 	}
-	else if (name == DEMO2_Alpha.getName())
+
+	else if (name == scaleSvg.getName())
 	{
-		setAlpha(DEMO2_Alpha);
+		setScale(scaleSvg);
+	}
+
+	else if (name == bReset.getName() && bReset)
+	{
+		bReset = false;
+		reset();
+	}
+
+	//else if (name == positionCanvas.getName())
+	//{
+	//	rectangle_SVG.setPosition(positionCanvas.get().x, positionCanvas.get().y);
+	//}
+	//else if (name == shapeCanvas.getName())
+	//{
+	//	rSvgBounds.setWidth(shapeCanvas.get().x);
+	//	rSvgBounds.setHeight(shapeCanvas.get().y);
+	//	//TODO:
+	//	wRect = rSvgBounds.getWidth() * scale;
+	//	hRect = rSvgBounds.getHeight() * scale;
+	//}
+
+	else if (name == alphaSvg.getName())
+	{
+		setAlpha(alphaSvg);
 	}
 
 	// blend
@@ -262,31 +351,18 @@ void DEMO_Svg::update() {
 
 	// edit draggable scale object
 
-	if (rSvg.isEditing())
+	if (rectangle_SVG.isEditing())
 	{
-		////highlight
-		//ofFill();
-		//int fr = ofGetFrameNum() % 60;
-		//ofSetColor(fr < 30 ? ofColor(255, 16) : (ofColor(0, 16)));
-		//ofDrawRectangle(rSvg);
-
-		//-
-
-		w2 = (rSvgBounds.getWidth() * scale);
-		h2 = (rSvgBounds.getHeight() * scale);
-		x2 = rSvg.getX();
-		y2 = rSvg.getY();
-		rSvg.setWidth(w2);
-		rSvg.setHeight(h2);
-
-		//float _ratio = rSvg.getHeight() / rSvg.getHeight();
-		//scale = rSvg.getY() / rSvgBounds.getY();
+		refreshEdited();
 	}
 }
 
 #ifdef USE_MASK
 //--------------------------------------------------------------
+		//float _ratio = rectangle_SVG.getHeight() / rectangle_SVG.getHeight();
+		//scale = rectangle_SVG.getY() / rSvgBounds.getY();
 void DEMO_Svg::update_Mask()
+
 {
 	//if (enable_Mask)
 	{
@@ -301,7 +377,7 @@ void DEMO_Svg::update_Mask()
 		{
 			ofClear(0);
 			ofFill();
-			img_Mask.draw(x2, y2, w2, h2);
+			img_Mask.draw(xRect, yRect, wRect, hRect);
 		}
 		maskFbo.end();
 	}
@@ -310,6 +386,7 @@ void DEMO_Svg::update_Mask()
 //--------------------------------------------------------------
 void DEMO_Svg::draw_Mask()
 {
+	ofPushStyle();
 	//ofPushMatrix();
 	//ofTranslate(-position.get().x, -position.get().y);
 
@@ -317,13 +394,14 @@ void DEMO_Svg::draw_Mask()
 	ofSetColor(255, 255);
 	alphaMask.begin(maskFbo.getTexture());
 	{
-		float ratio = w / h;
+		float ratio = wSource / hSource;
 		srcFbo.draw(0, 0, ofGetWidth(), ofGetWidth() / ratio);
 		//srcFbo.draw(-position.get().x, -position.get().y, ofGetWidth(), ofGetWidth() / ratio);
 	}
 	alphaMask.end();
 
 	//ofPopMatrix();
+	ofPopStyle();
 }
 
 #endif
@@ -331,6 +409,8 @@ void DEMO_Svg::draw_Mask()
 //--------------------------------------------------------------
 void DEMO_Svg::draw_SVG()
 {
+	ofPushStyle();
+
 	psBlend.begin();
 	svg.draw();
 	psBlend.end();
@@ -349,13 +429,12 @@ void DEMO_Svg::draw_SVG()
 	//str += "Blend Mode: [" + ofToString(blendMode) + "] " + psBlend.getBlendMode(blendMode);
 	//ofDrawBitmapStringHighlight(str, 20, 30);
 
-	ofPushStyle();
 	ofPushMatrix();
 
-	ofTranslate(rSvg.getX(), rSvg.getY());
+	ofTranslate(rectangle_SVG.getX(), rectangle_SVG.getY());
 
 	//ofPushMatrix();
-	//ofTranslate(rSvg.getWidth() / 2.f, rSvg.getHeight()/2.0f);
+	//ofTranslate(rectangle_SVG.getWidth() / 2.f, rectangle_SVG.getHeight()/2.0f);
 	ofScale(scale);
 	{
 		psBlend.draw(img.getTextureReference(), blendMode);
@@ -369,7 +448,7 @@ void DEMO_Svg::draw_SVG()
 //--------------------------------------------------------------
 void DEMO_Svg::draw()
 {
-	if (DEMO2_Enable)
+	if (bEnable)
 	{
 		update();
 
@@ -389,12 +468,28 @@ void DEMO_Svg::draw()
 			draw_SVG();
 		}
 #endif
+	}
 
+	//debug border
+	if (bDrawBorder)
+	{
+		ofPushStyle();
+		ofNoFill();
+
+		//blink on editing
+		ofSetLineWidth(2);
+		ofSetColor(128, (bEdit ? ofxSurfingHelpers::Bounce(0.5) + 0.25 : 1) * 128);
+		ofDrawRectangle(rectangle_SVG);
+
+		//ofSetColor(128, 32);
+		//ofDrawRectangle(rSvgBounds);
+		
+		ofPopStyle();
 	}
 
 	//----
 
-	if (ShowGui) gui.draw();
+	if (bShowGui) gui.draw();
 }
 
 //--------------------------------------------------------------
@@ -408,7 +503,7 @@ void DEMO_Svg::setLinkPalette(vector<ofColor> &p)
 //--------------------------------------------------------------
 void DEMO_Svg::keyPressed(ofKeyEventArgs &eventArgs)
 {
-	if (!keys) { return; }
+	if (!bKeys) { return; }
 
 	const int key = eventArgs.key;
 
@@ -561,7 +656,9 @@ void DEMO_Svg::load_SVG(std::string name)
 	else if (name == "moebius")
 	{
 		maxNumSvgGroupColors = 7;//moebius
+#ifdef USE_MASK
 		enable_Mask = false;//no mask for this svg
+#endif
 	}
 	else
 	{
@@ -586,8 +683,9 @@ void DEMO_Svg::load_SVG(std::string name)
 
 	rSvgBounds = svg.getBounds();
 
-	w = rSvgBounds.getWidth();
-	h = rSvgBounds.getHeight();
+	wSource = rSvgBounds.getWidth();
+	hSource = rSvgBounds.getHeight();
+	ratioSource = hSource / wSource;
 
 	//TODO:
 	//scale
@@ -595,16 +693,16 @@ void DEMO_Svg::load_SVG(std::string name)
 	//getTransformFromSvgMatrix(string matrix, ofVec2f& apos, float & scaleX, float & scaleY, float & arotation)
 	//vector< shared_ptr<ofxSvgImage> > trees = svg.getElementsForType< ofxSvgImage>("trees");
 
-	shape = glm::vec2(w, h);
+	shape = glm::vec2(wSource, hSource);
 	//ratio = shape.x / shape.y;
 
-	img.resize(w, h);
+	img.resize(wSource, hSource);
 
 #ifdef USE_MASK
-	img_Mask.resize(w, h);
+	img_Mask.resize(wSource, hSource);
 #endif
 
-	//psBlend.setup(w, h);
+	//psBlend.setup(wSource, hSource);
 	psBlend.setup(img.getWidth(), img.getHeight());
 
 	//blendMode = 1;//multiply
@@ -613,14 +711,14 @@ void DEMO_Svg::load_SVG(std::string name)
 	paletteSvg.resize(maxNumSvgGroupColors);
 
 	// draggable rect
-	rSvg.setRect(rSvgBounds.getX(), rSvgBounds.getY(), w, h);//default init
-	rSvg.setLockResize(false);
-	//rSvg.setLockResize(true);
+	rectangle_SVG.setRect(rSvgBounds.getX(), rSvgBounds.getY(), wSource, hSource);//default init
+	rectangle_SVG.setLockResize(false);
+	//rectangle_SVG.setLockResize(true);
 
 	// b. load settings
-	//rSvg.loadSettings();
+	//rectangle_SVG.loadSettings();
 	//path_Layout = path_Global;
-	//rSvg.loadSettings(path_Name, path_Layout, false);
+	//rectangle_SVG.loadSettings(path_Name, path_Layout, false);
 
 	//--
 
@@ -628,7 +726,7 @@ void DEMO_Svg::load_SVG(std::string name)
 	//if (enable_Mask)
 	{
 		//srcFbo.allocate(1920, 1080, GL_RGBA);
-		srcFbo.allocate(w, h, GL_RGBA);
+		srcFbo.allocate(wSource, hSource, GL_RGBA);
 		srcFbo.begin();
 		{
 			ofClear(0);
@@ -636,7 +734,7 @@ void DEMO_Svg::load_SVG(std::string name)
 		srcFbo.end();
 
 		//maskFbo.allocate(1920, 1080, GL_RGBA);
-		maskFbo.allocate(w, h, GL_RGBA);
+		maskFbo.allocate(wSource, hSource, GL_RGBA);
 		maskFbo.begin();
 		{
 			ofClear(0);
@@ -647,15 +745,72 @@ void DEMO_Svg::load_SVG(std::string name)
 
 	//--
 
-	//// load layout
-	rSvg.loadSettings(path_Name, path_Layout, false);
-	//setEdit(DEMO2_Edit);
+	// load layout
+	rectangle_SVG.loadSettings(path_Name, path_Layout, false);
+	//setEdit(bEdit);
 
-	//fix workaroung for startup bug
-	w2 = (rSvgBounds.getWidth() * scale);
-	h2 = (rSvgBounds.getHeight() * scale);
-	x2 = rSvg.getX();
-	y2 = rSvg.getY();
-	rSvg.setWidth(w2);
-	rSvg.setHeight(h2);
+	//fix workaround for startup bug
+	wRect = (rSvgBounds.getWidth() * scale);
+	hRect = (rSvgBounds.getHeight() * scale);
+	xRect = rectangle_SVG.getX();
+	yRect = rectangle_SVG.getY();
+
+	rectangle_SVG.setWidth(wRect);
+	rectangle_SVG.setHeight(hRect);
+}
+
+//--------------------------------------------------------------
+void DEMO_Svg::refreshEdited() {
+
+	////highlight
+	//ofFill();
+	//int fr = ofGetFrameNum() % 60;
+	//ofSetColor(fr < 30 ? ofColor(255, 16) : (ofColor(0, 16)));
+	//ofDrawRectangle(rectangle_SVG);
+
+	//-
+
+	wRect = rSvgBounds.getWidth() * scale;
+	hRect = rSvgBounds.getHeight() * scale;
+	xRect = rectangle_SVG.getX();
+	yRect = rectangle_SVG.getY();
+
+	rectangle_SVG.setWidth(wRect);
+	rectangle_SVG.setHeight(hRect);
+
+	//positionCanvas = glm::vec2(xRect, yRect);
+	//shapeCanvas = glm::vec2(rSvgBounds.getWidth(), rSvgBounds.getHeight());
+}
+
+//--------------------------------------------------------------
+void DEMO_Svg::reset() {
+	bEdit = false;
+	fileIndex = 1;
+	scaleSvg = 1;
+	alphaSvg = 0.5f;
+	blendMode = 4;
+
+	//--
+
+	// layout
+
+	wRect = wSource;//original size
+	//wRect = 1000;
+	hRect = wRect * ratioSource;
+
+	xRect = ofGetWidth() / 2 - wRect / 2;
+	yRect = ofGetHeight() / 2 - hRect / 2;
+
+	//rectangle_SVG.loadSettings(path_Name, path_Layout, false);
+	//rectangle_SVG.setRestore();
+	//rectangle_SVG.set(glm::vec2(200, 200), 800, 400);
+
+	//refreshEdited();
+
+
+	rectangle_SVG.setWidth(wRect);
+	rectangle_SVG.setHeight(hRect);
+
+	scale = wRect / rSvgBounds.getWidth();
+
 }

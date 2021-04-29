@@ -9,11 +9,14 @@ Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 ![image](/readme_images/Capture1.jpg?raw=true "image")  
 ![image](/readme_images/Capture2.jpg?raw=true "image")  
 
+![image](/readme_images/Capture3.PNG?raw=true "image")  
+
 ## Features
 - GUI and store/recall settings.
 - Resize and scale using mouse.
-- Different blend modes and transparency.  
+- Different Blend Modes and transparency.  
 - Selectable file with some limitations.  
+- Available ```ofRectangle``` to set/get position and size.
 
 ## Usage
 Look the example.  
@@ -29,7 +32,7 @@ Look the example.
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * ofxGui
 
-Already included into **OF_ADDON/libs**. No need to add manually.  
+Already included into **OF_ADDON/libs**. No need to clone/add manually.  
 Look into folders to authorship, original forks, or licenses.  
 * ofxPSBlend
 * ofxScaleDragRect
