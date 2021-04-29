@@ -6,9 +6,7 @@ An **openFrameworks** addon to load and live-colorize an customized **SVG** file
 Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 
 ## Screenshot
-![image](/readme_images/Capture1.jpg?raw=true "image")  
-![image](/readme_images/Svg-Layers.jpg?raw=true "image")  
-
+Example:  
 ![image](/readme_images/Capture3.PNG?raw=true "image")  
 
 ## Features
@@ -22,6 +20,10 @@ Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 Look the example.  
 
 **How to prepare the SVG file on Illustrator:**  
+
+![image](/readme_images/Capture1.jpg?raw=true "image")  
+![image](/readme_images/Svg-Layers.jpg?raw=true "image")  
+
 1. Import your image to be vectorized.  
 2. Draw all each color mask/shape by hand.  
 3. Name the groups/layers as: *group1*, *group2*, *group3*... as in the screenshot.  
