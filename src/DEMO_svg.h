@@ -5,14 +5,14 @@
 //
 // TODO:
 //
-// + allow draw position and size
-// + use a container rectangle to allow fit/resize
-// + using fbo ?
-// + mask mode is displaced 
-// + must sync/reference mouse drag/rectangle etc. Now is no referenced to the mouse point
+// + fix. mask mode is displaced 
+// + use fbo ?
+// + center mouse / center
 
 
 /*
+
+IMPORTANT
 
 For the momment we need to set manually the expected number of groups on the SVG.
 We must remember to name the the groups as:
@@ -27,8 +27,8 @@ Do not include hidden layers or mask, can be problematic.
 //--------------------------------------------------------------
 //
 // OPTIONAL
-//#define USE_MASK
-//#define USE_IMGUI // to easy populate control widgets on other projects
+#define USE_IMGUI // to easy populate control widgets on other projects. Disable if you do not needs ImGui helper.
+//#define USE_MASK // to allow transparent background on the inforunt image... TODO: WIP
 //
 //--------------------------------------------------------------
 
@@ -208,28 +208,42 @@ public:
 				ofxSurfingHelpers::AddBigToggle(bEdit, _w100, _h / 2);
 				//ofxImGui::AddParameter(bEdit);
 
-				if (bEdit) ofxImGui::AddParameter(scaleSvg);
-				ofxImGui::AddParameter(alphaSvg);
-				ofxImGui::AddStepper(blendMode);
-				ofxImGui::AddParameter(blendModeName);
-				ofxImGui::AddStepper(fileIndex);
-				ofxImGui::AddParameter(fileIndexName);
+				if (bEdit) {
+					ofxImGui::AddParameter(scaleSvg);
+					ofxImGui::AddParameter(bDrawBorder);
+					ofxImGui::AddParameter(alphaSvg);
+					ofxImGui::AddParameter(xRect);
+					ofxImGui::AddParameter(yRect);
+					ofxImGui::AddParameter(wRect);
+					ofxImGui::AddParameter(hRect);
+				}
+
+				if (ImGui::CollapsingHeader("IMAGE")) {
+					ofxImGui::AddStepper(blendMode);
+					ofxImGui::AddParameter(blendModeName);
+					ofxImGui::AddStepper(fileIndex);
+					ofxImGui::AddParameter(fileIndexName);
 #ifdef USE_SVG_MASK
-				ofxImGui::AddParameter(enable_Mask);
-				ofxImGui::AddParameter(bBgWhite);
+					ofxImGui::AddParameter(enable_Mask);
+					ofxImGui::AddParameter(bBgWhite);
 #endif		
+				}
+
 				ofxImGui::AddParameter(bKeys);
 				ImGui::PopItemWidth();
 
 				if (ImGui::Button("Reset SVG", ImVec2(_w100, _h / 2))) {
 					reset();
 				}
-				if (ImGui::Button("Load", ImVec2(_w50, _h / 2))) {
-					load();
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Save", ImVec2(_w50, _h / 2))) {
-					save();
+
+				if (bEdit) {
+					if (ImGui::Button("Load", ImVec2(_w50, _h / 2))) {
+						load();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Save", ImVec2(_w50, _h / 2))) {
+						save();
+					}
 				}
 			}
 		}
@@ -328,7 +342,7 @@ public:
 	//--------------------------------------------------------------
 	ofRectangle getRect()
 	{
-		ofRectangle(xRect, yRect, wRect, hRect);
+		return ofRectangle(xRect, yRect, wRect, hRect);
 	}
 
 	//--
