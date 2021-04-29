@@ -7,7 +7,7 @@ Also blends the **SVG** with a **JPG** file, like an outline B&W lines image.
 
 ## Screenshot
 ![image](/readme_images/Capture1.jpg?raw=true "image")  
-![image](/readme_images/Capture2.jpg?raw=true "image")  
+![image](/readme_images/Svg-Layers.jpg?raw=true "image")  
 
 ![image](/readme_images/Capture3.PNG?raw=true "image")  
 
