@@ -31,6 +31,7 @@ void DEMO_Svg::setup() {
 
 	bEdit.setSerializable(false);
 	bReset.setSerializable(false);
+	bDrawBorder.setSerializable(false);
 
 	params.add(bEnable);
 	params.add(alphaSvg);
