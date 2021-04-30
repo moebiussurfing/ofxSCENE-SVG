@@ -4,6 +4,7 @@
 void ofApp::setup() 
 {
 	demoScene.setLinkPalette(palette);
+	demoScene.setEnable(true); //hidden by default
 
 	randomizePalette();
 }

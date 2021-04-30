@@ -1,0 +1,19 @@
+{
+    "ofxSCENE-SVG": {
+        "Alpha": "0.5",
+        "Blend_Type": "4",
+        "Box": {
+            "Draw_Border": "1",
+            "Rectangle": {
+                "Height": "562",
+                "Position_x": "634",
+                "Position_y": "466",
+                "Width": "865"
+            },
+            "Scale": "0.844727"
+        },
+        "Enable_DEMO_Svg": "1",
+        "Enable_Keys": "1",
+        "SVG_File": "1"
+    }
+}

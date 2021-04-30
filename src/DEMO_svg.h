@@ -14,13 +14,13 @@
 
 IMPORTANT
 
-For the momment we need to set manually the expected number of groups on the SVG.
+For the momment we need to set manually the expected number of groups/colors on the SVG.
 We must remember to name the the groups as:
-group1, group2, group3... on Illustrator
+group1, group2, group3... on Illustrator.
 Use SVG 1.1 Tiny file format.
 All the elements inside the group are paths
 Do not include hidden layers or mask, can be problematic.
-Look to the image captures in /docs/
+Look to the image captures in /readme_images/
 
 */
 
@@ -99,6 +99,11 @@ public:
 
 public:
 	//--------------------------------------------------------------
+	void setEnable(bool b) {
+		bEnable = b;
+	}
+
+	//--------------------------------------------------------------
 	void setEnableKeys(bool b) {
 		bKeys = b;
 		if (b) {
@@ -174,7 +179,7 @@ public:
 	ofParameter<bool> bReset{ "Reset", false };
 	ofParameter<bool> bKeys{ "Enable Keys", true };
 	ofParameter<bool> bShowGui{ "Show Gui", true };
-	ofParameter<bool> bEnable{ "Enable DEMO Svg", false };
+	ofParameter<bool> bEnable{ "Enable DEMO Svg", false};
 	ofParameter<bool> bEdit{ "MOUSE EDIT", false };
 	ofParameter<float> scaleSvg{ "Scale", 1, 0.1, 2.0f };
 	ofParameter<float> alphaSvg{ "Alpha", 1.0f, 0, 1.0f };
