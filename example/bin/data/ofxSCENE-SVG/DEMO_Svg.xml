@@ -5,12 +5,12 @@
         "Box": {
             "Draw_Border": "1",
             "Rectangle": {
-                "Height": "666",
-                "Position_x": "21",
-                "Position_y": "117",
-                "Width": "1024"
+                "Height": "541",
+                "Position_x": "227",
+                "Position_y": "153",
+                "Width": "831"
             },
-            "Scale": "1"
+            "Scale": "0.813477"
         },
         "Enable_DEMO_Svg": "1",
         "Enable_Keys": "0",

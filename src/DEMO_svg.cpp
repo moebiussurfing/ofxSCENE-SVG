@@ -138,8 +138,8 @@ void DEMO_Svg::mouseScrolled(ofMouseEventArgs &eventArgs)
 		// zoom 
 		//if (rectangle_SVG.inside(glm::vec2(x, y))) // inside only but translated when rescaled
 		{
-			if (scrollY == 1) scaleSvg += 0.025f;
-			else if (scrollY == -1) scaleSvg -= 0.025f;
+			if (scrollY == 1) scaleSvg += DRAG_STEP;
+			else if (scrollY == -1) scaleSvg -= DRAG_STEP;
 		}
 	}
 }
@@ -202,7 +202,12 @@ void DEMO_Svg::Changed_Rectangle(ofAbstractParameter &e)
 	}
 	else if (name == hRect.getName())
 	{
+		float _w = hRect / ratioSource;
+		wRect = _w;
 		rectangle_SVG.setHeight(hRect);
+
+		//wRect.setWithoutEventNotifications(_w);
+
 		//can be controlled by height!
 	}
 }
@@ -351,10 +356,10 @@ void DEMO_Svg::update() {
 
 	// edit draggable scale object
 
-	if (rectangle_SVG.isEditing())
-	{
-		refreshEdited();
-	}
+	//if (rectangle_SVG.isEditing())
+	//{
+	//	refreshEdited();
+	//}
 }
 
 #ifdef USE_MASK
@@ -750,26 +755,6 @@ void DEMO_Svg::load_SVG(std::string name)
 	//setEdit(bEdit);
 
 	//fix workaround for startup bug
-	wRect = (rSvgBounds.getWidth() * scale);
-	hRect = (rSvgBounds.getHeight() * scale);
-	xRect = rectangle_SVG.getX();
-	yRect = rectangle_SVG.getY();
-
-	rectangle_SVG.setWidth(wRect);
-	rectangle_SVG.setHeight(hRect);
-}
-
-//--------------------------------------------------------------
-void DEMO_Svg::refreshEdited() {
-
-	////highlight
-	//ofFill();
-	//int fr = ofGetFrameNum() % 60;
-	//ofSetColor(fr < 30 ? ofColor(255, 16) : (ofColor(0, 16)));
-	//ofDrawRectangle(rectangle_SVG);
-
-	//-
-
 	wRect = rSvgBounds.getWidth() * scale;
 	hRect = rSvgBounds.getHeight() * scale;
 	xRect = rectangle_SVG.getX();
@@ -777,10 +762,30 @@ void DEMO_Svg::refreshEdited() {
 
 	rectangle_SVG.setWidth(wRect);
 	rectangle_SVG.setHeight(hRect);
-
-	//positionCanvas = glm::vec2(xRect, yRect);
-	//shapeCanvas = glm::vec2(rSvgBounds.getWidth(), rSvgBounds.getHeight());
 }
+
+////--------------------------------------------------------------
+//void DEMO_Svg::refreshEdited() {
+//
+//	////highlight
+//	//ofFill();
+//	//int fr = ofGetFrameNum() % 60;
+//	//ofSetColor(fr < 30 ? ofColor(255, 16) : (ofColor(0, 16)));
+//	//ofDrawRectangle(rectangle_SVG);
+//
+//	//-
+//
+//	wRect = rSvgBounds.getWidth() * scale;
+//	hRect = rSvgBounds.getHeight() * scale;
+//	xRect = rectangle_SVG.getX();
+//	yRect = rectangle_SVG.getY();
+//
+//	rectangle_SVG.setWidth(wRect);
+//	rectangle_SVG.setHeight(hRect);
+//
+//	//positionCanvas = glm::vec2(xRect, yRect);
+//	//shapeCanvas = glm::vec2(rSvgBounds.getWidth(), rSvgBounds.getHeight());
+//}
 
 //--------------------------------------------------------------
 void DEMO_Svg::reset() {

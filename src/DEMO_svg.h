@@ -27,7 +27,7 @@ Do not include hidden layers or mask, can be problematic.
 //--------------------------------------------------------------
 //
 // OPTIONAL
-#define USE_IMGUI // to easy populate control widgets on other projects. Disable if you do not needs ImGui helper.
+//#define USE_IMGUI // to easy populate control widgets on other projects. Disable if you do not needs ImGui helper.
 //#define USE_MASK // to allow transparent background on the inforunt image... TODO: WIP
 //
 //--------------------------------------------------------------
@@ -49,6 +49,8 @@ Do not include hidden layers or mask, can be problematic.
 #endif
 
 #define MAX_PALETTE_COLORS 20
+
+#define DRAG_STEP 0.025f
 
 class DEMO_Svg
 {
@@ -296,7 +298,7 @@ public:
 
 	}
 	void reset();
-	void refreshEdited();
+	//void refreshEdited();
 
 	//--------------------------------------------------------------
 	glm::vec2 getPositionTittle()
@@ -337,6 +339,35 @@ public:
 		//hRect = r.getHeight();
 
 		//can be controlled by height!
+	}
+
+	//--------------------------------------------------------------
+	void setX(float x)
+	{
+		xRect = x;
+	}
+	//--------------------------------------------------------------
+	void setY(float y)
+	{
+		yRect = y;
+	}
+	//--------------------------------------------------------------
+	void setWidth(float w)
+	{
+		wRect = w;
+	}
+	//TODO:
+	////--------------------------------------------------------------
+	//void setHeight(float h)
+	//{
+	//	hRect = h;
+	//}
+
+	//--------------------------------------------------------------
+	float getRatio()
+	{
+		//return hRect / wRect;
+		return ratioSource;
 	}
 
 	//--------------------------------------------------------------
