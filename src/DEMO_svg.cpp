@@ -13,10 +13,6 @@ void DEMO_Svg::setup() {
 	//rectangle_SVG.loadSettings(path_Name, path_Layout, false);
 	rectangle_SVG.setAllScreenMouse(true);
 
-	//ww = ofGetWidth();
-	//hh = ofGetHeight();
-	//position.set("Positon", glm::vec2(ww / 2, hh / 2), glm::vec2(0, 0), glm::vec2(ww, hh));
-
 	//--
 
 	refresh_Files(path_Global);
@@ -29,9 +25,6 @@ void DEMO_Svg::setup() {
 	fileIndexName.setSerializable(false);
 	maxNumSvgGroupColors.setSerializable(false);
 
-	//positionCanvas.set("Position", glm::vec2(30, 30), glm::vec2(0, 0), glm::vec2(1920, 1080));
-	//shapeCanvas.set("Shape", glm::vec2(30, 30), glm::vec2(0, 0), glm::vec2(1920, 1080));
-
 	//--
 
 	// control params for callback
@@ -39,8 +32,6 @@ void DEMO_Svg::setup() {
 	bEdit.setSerializable(false);
 	bReset.setSerializable(false);
 
-	//params.add(positionCanvas);
-	//params.add(shapeCanvas);
 	params.add(bEnable);
 	params.add(alphaSvg);
 	params.add(blendMode);
@@ -65,7 +56,6 @@ void DEMO_Svg::setup() {
 
 	params.add(bKeys);
 	params.add(bReset);
-	//params.add(position);
 
 	ofAddListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
 	ofAddListener(params_Rectangle.parameterChangedE(), this, &DEMO_Svg::Changed_Rectangle);
@@ -145,32 +135,6 @@ void DEMO_Svg::mouseScrolled(ofMouseEventArgs &eventArgs)
 }
 
 //--------------------------------------------------------------
-void DEMO_Svg::mouseDragged(ofMouseEventArgs &eventArgs)
-{
-	//const int &x = eventArgs.x;
-	//const int &y = eventArgs.y;
-	//ofLogNotice(__FUNCTION__) << x << ", " << y;
-
-	//float xx = x;
-	//float yy = y;
-
-	//////xx = x + rectangle_SVG.getWidth() * scale * 1.0;
-	//////yy = y + rectangle_SVG.getHeight() * scale * 1.0;
-
-	//if (bEdit)
-	//{
-	//	float xpre;
-	//	float ypre;
-	//	xpre = rectangle_SVG.getRectX();
-	//	ypre = rectangle_SVG.getRectY();
-
-	//	//rectangle_SVG.setPosition(-xx + xpre, -yy + ypre);
-
-	//	//position = glm::vec2(xx, yy);
-	//}
-}
-
-//--------------------------------------------------------------
 void DEMO_Svg::Changed_Rectangle(ofAbstractParameter &e)
 {
 	std::string name = e.getName();
@@ -198,7 +162,7 @@ void DEMO_Svg::Changed_Rectangle(ofAbstractParameter &e)
 
 		hRect = wRect * ratioSource;
 
-		scaleSvg = wRect / rSvgBounds.getWidth();
+		scaleSvg = wRect / rectangle_SVG_Bounds.getWidth();
 	}
 	else if (name == hRect.getName())
 	{
@@ -252,19 +216,6 @@ void DEMO_Svg::Changed_Controls(ofAbstractParameter &e)
 		bReset = false;
 		reset();
 	}
-
-	//else if (name == positionCanvas.getName())
-	//{
-	//	rectangle_SVG.setPosition(positionCanvas.get().x, positionCanvas.get().y);
-	//}
-	//else if (name == shapeCanvas.getName())
-	//{
-	//	rSvgBounds.setWidth(shapeCanvas.get().x);
-	//	rSvgBounds.setHeight(shapeCanvas.get().y);
-	//	//TODO:
-	//	wRect = rSvgBounds.getWidth() * scale;
-	//	hRect = rSvgBounds.getHeight() * scale;
-	//}
 
 	else if (name == alphaSvg.getName())
 	{
@@ -333,7 +284,7 @@ void DEMO_Svg::update() {
 				shared_ptr<ofxSvgGroup> bGroup = svg.get< ofxSvgGroup>(name.c_str());
 				if (bGroup && i < paletteSvg.size())
 				{
-					ofColor c = ofColor(paletteSvg[i], alpha * 255.0);
+					ofColor c = ofColor(paletteSvg[i], alphaBlend * 255.0);
 
 					for (int e = 0; e < bGroup->getElements().size(); e++)
 					{
@@ -351,21 +302,12 @@ void DEMO_Svg::update() {
 #ifdef USE_MASK
 	update_Mask();
 #endif
-
-	//--
-
-	// edit draggable scale object
-
-	//if (rectangle_SVG.isEditing())
-	//{
-	//	refreshEdited();
-	//}
 }
 
 #ifdef USE_MASK
 //--------------------------------------------------------------
-		//float _ratio = rectangle_SVG.getHeight() / rectangle_SVG.getHeight();
-		//scale = rectangle_SVG.getY() / rSvgBounds.getY();
+		//float _ratio = rectangle_SVG.getHeight() / rectangle_SVG.getHeight(); // ??
+		//scaleSource = rectangle_SVG.getY() / rectangle_SVG_Bounds.getY();
 void DEMO_Svg::update_Mask()
 
 {
@@ -392,20 +334,16 @@ void DEMO_Svg::update_Mask()
 void DEMO_Svg::draw_Mask()
 {
 	ofPushStyle();
-	//ofPushMatrix();
-	//ofTranslate(-position.get().x, -position.get().y);
 
 	// srcFbo/maskFbo
 	ofSetColor(255, 255);
 	alphaMask.begin(maskFbo.getTexture());
 	{
-		float ratio = wSource / hSource;
-		srcFbo.draw(0, 0, ofGetWidth(), ofGetWidth() / ratio);
-		//srcFbo.draw(-position.get().x, -position.get().y, ofGetWidth(), ofGetWidth() / ratio);
+		float ratio = wSource / hSource; // ??
+		srcFbo.draw(0, 0, ofGetWidth(), ofGetWidth() / ratio); // ??
 	}
 	alphaMask.end();
 
-	//ofPopMatrix();
 	ofPopStyle();
 }
 
@@ -440,7 +378,7 @@ void DEMO_Svg::draw_SVG()
 
 	//ofPushMatrix();
 	//ofTranslate(rectangle_SVG.getWidth() / 2.f, rectangle_SVG.getHeight()/2.0f);
-	ofScale(scale);
+	ofScale(scaleSource);
 	{
 		psBlend.draw(img.getTextureReference(), blendMode);
 	}
@@ -487,8 +425,8 @@ void DEMO_Svg::draw()
 		ofDrawRectangle(rectangle_SVG);
 
 		//ofSetColor(128, 32);
-		//ofDrawRectangle(rSvgBounds);
-		
+		//ofDrawRectangle(rectangle_SVG_Bounds);
+
 		ofPopStyle();
 	}
 
@@ -647,10 +585,9 @@ void DEMO_Svg::load_SVG(std::string name)
 	svg.load(path_Global + name + "/" + name + ".svg");
 #ifdef USE_MASK
 	img_Mask.load(path_Global + name + "/" + name + "_Mask.jpg");
-	//img_Mask.load(path_Global + name + "/" + name + "-Mask.jpg");
 #endif
 	img.load(path_Global + name + "/" + name + ".jpg");
-	shape = glm::vec2(img.getWidth(), img.getHeight());
+	shapeImg = glm::vec2(img.getWidth(), img.getHeight());
 
 	//TODO: count svg groups/layers
 	//hardcoded workaround
@@ -686,10 +623,10 @@ void DEMO_Svg::load_SVG(std::string name)
 
 	ofLogNotice(__FUNCTION__) << endl << endl << svg.toString();
 
-	rSvgBounds = svg.getBounds();
+	rectangle_SVG_Bounds = svg.getBounds();
 
-	wSource = rSvgBounds.getWidth();
-	hSource = rSvgBounds.getHeight();
+	wSource = rectangle_SVG_Bounds.getWidth();
+	hSource = rectangle_SVG_Bounds.getHeight();
 	ratioSource = hSource / wSource;
 
 	//TODO:
@@ -698,8 +635,8 @@ void DEMO_Svg::load_SVG(std::string name)
 	//getTransformFromSvgMatrix(string matrix, ofVec2f& apos, float & scaleX, float & scaleY, float & arotation)
 	//vector< shared_ptr<ofxSvgImage> > trees = svg.getElementsForType< ofxSvgImage>("trees");
 
-	shape = glm::vec2(wSource, hSource);
-	//ratio = shape.x / shape.y;
+	shapeImg = glm::vec2(wSource, hSource);
+	//ratio = shapeImg.x / shapeImg.y; // ??
 
 	img.resize(wSource, hSource);
 
@@ -716,7 +653,7 @@ void DEMO_Svg::load_SVG(std::string name)
 	paletteSvg.resize(maxNumSvgGroupColors);
 
 	// draggable rect
-	rectangle_SVG.setRect(rSvgBounds.getX(), rSvgBounds.getY(), wSource, hSource);//default init
+	rectangle_SVG.setRect(rectangle_SVG_Bounds.getX(), rectangle_SVG_Bounds.getY(), wSource, hSource);//default init
 	rectangle_SVG.setLockResize(false);
 	//rectangle_SVG.setLockResize(true);
 
@@ -755,37 +692,14 @@ void DEMO_Svg::load_SVG(std::string name)
 	//setEdit(bEdit);
 
 	//fix workaround for startup bug
-	wRect = rSvgBounds.getWidth() * scale;
-	hRect = rSvgBounds.getHeight() * scale;
+	wRect = rectangle_SVG_Bounds.getWidth() * scaleSource;
+	hRect = rectangle_SVG_Bounds.getHeight() * scaleSource;
 	xRect = rectangle_SVG.getX();
 	yRect = rectangle_SVG.getY();
 
 	rectangle_SVG.setWidth(wRect);
 	rectangle_SVG.setHeight(hRect);
 }
-
-////--------------------------------------------------------------
-//void DEMO_Svg::refreshEdited() {
-//
-//	////highlight
-//	//ofFill();
-//	//int fr = ofGetFrameNum() % 60;
-//	//ofSetColor(fr < 30 ? ofColor(255, 16) : (ofColor(0, 16)));
-//	//ofDrawRectangle(rectangle_SVG);
-//
-//	//-
-//
-//	wRect = rSvgBounds.getWidth() * scale;
-//	hRect = rSvgBounds.getHeight() * scale;
-//	xRect = rectangle_SVG.getX();
-//	yRect = rectangle_SVG.getY();
-//
-//	rectangle_SVG.setWidth(wRect);
-//	rectangle_SVG.setHeight(hRect);
-//
-//	//positionCanvas = glm::vec2(xRect, yRect);
-//	//shapeCanvas = glm::vec2(rSvgBounds.getWidth(), rSvgBounds.getHeight());
-//}
 
 //--------------------------------------------------------------
 void DEMO_Svg::reset() {
@@ -801,6 +715,7 @@ void DEMO_Svg::reset() {
 
 	wRect = wSource;//original size
 	//wRect = 1000;
+
 	hRect = wRect * ratioSource;
 
 	xRect = ofGetWidth() / 2 - wRect / 2;
@@ -810,12 +725,8 @@ void DEMO_Svg::reset() {
 	//rectangle_SVG.setRestore();
 	//rectangle_SVG.set(glm::vec2(200, 200), 800, 400);
 
-	//refreshEdited();
-
-
 	rectangle_SVG.setWidth(wRect);
 	rectangle_SVG.setHeight(hRect);
 
-	scale = wRect / rSvgBounds.getWidth();
-
+	scaleSource = wRect / rectangle_SVG_Bounds.getWidth();
 }

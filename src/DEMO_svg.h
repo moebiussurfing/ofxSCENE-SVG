@@ -5,9 +5,9 @@
 //
 // TODO:
 //
-// + fix. mask mode is displaced 
-// + use fbo ?
-// + center mouse / center
+// + fix. mask mode is displaced to the non maksed mode..
+// + mask looks worst image quality/resolution
+// + use fbo to custom draw position/size ??
 
 
 /*
@@ -20,6 +20,7 @@ group1, group2, group3... on Illustrator
 Use SVG 1.1 Tiny file format.
 All the elements inside the group are paths
 Do not include hidden layers or mask, can be problematic.
+Look to the image captures in /docs/
 
 */
 
@@ -42,15 +43,13 @@ Do not include hidden layers or mask, can be problematic.
 #ifdef USE_MASK
 #include "ofxAlphaMask.h"
 #endif
-
 #ifdef USE_IMGUI
 #include "ofxImGui.h"
 #include "ofxSurfing_ImGui.h"
 #endif
 
 #define MAX_PALETTE_COLORS 20
-
-#define DRAG_STEP 0.025f
+#define DRAG_STEP 0.025f // mouse speed
 
 class DEMO_Svg
 {
@@ -76,24 +75,24 @@ public:
 	DEMO_Svg()
 	{
 		setup();
-		ofAddListener(ofEvents().mouseDragged, this, &DEMO_Svg::mouseDragged);
+
 		ofAddListener(ofEvents().mouseScrolled, this, &DEMO_Svg::mouseScrolled);
 		ofAddListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
+		ofAddListener(ofEvents().keyReleased, this, &DEMO_Svg::keyReleased);
 	};
 
 	//--------------------------------------------------------------
 	~DEMO_Svg()
 	{
-		rectangle_SVG.saveSettings(path_Name, path_Layout, false);
-		ofxSurfingHelpers::saveGroup(params, path_AppSettings);
+		ofRemoveListener(ofEvents().mouseScrolled, this, &DEMO_Svg::mouseScrolled);
+		ofRemoveListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
+		ofRemoveListener(ofEvents().keyReleased, this, &DEMO_Svg::keyReleased);
 
 		ofRemoveListener(params.parameterChangedE(), this, &DEMO_Svg::Changed_Controls);
 		ofRemoveListener(params_Rectangle.parameterChangedE(), this, &DEMO_Svg::Changed_Rectangle);
 
-		ofRemoveListener(ofEvents().mouseDragged, this, &DEMO_Svg::mouseDragged);
-		ofRemoveListener(ofEvents().mouseScrolled, this, &DEMO_Svg::mouseScrolled);
-		ofRemoveListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
-		ofRemoveListener(ofEvents().keyReleased, this, &DEMO_Svg::keyReleased);
+		rectangle_SVG.saveSettings(path_Name, path_Layout, false);
+		ofxSurfingHelpers::saveGroup(params, path_AppSettings);
 	};
 
 	//--
@@ -101,7 +100,7 @@ public:
 public:
 	//--------------------------------------------------------------
 	void setEnableKeys(bool b) {
-		//bKeys = b;
+		bKeys = b;
 		if (b) {
 			ofAddListener(ofEvents().keyPressed, this, &DEMO_Svg::keyPressed);
 			ofAddListener(ofEvents().keyReleased, this, &DEMO_Svg::keyReleased);
@@ -126,22 +125,19 @@ public:
 		ofxSurfingHelpers::loadGroup(params, path_AppSettings);
 	};
 
+	//--
+
 public:
 	void setup();
 	void startup();
 	void update();
-	void draw();//use draggable rectangle
-	//void draw(glm::vec2 _pos);//force pos
-
+	void draw();
 	void draw_SVG();
 
 public:
-	//void keyPressed(int key);
 	void keyPressed(ofKeyEventArgs &eventArgs);
 	void keyReleased(ofKeyEventArgs &eventArgs);
 	void mouseScrolled(ofMouseEventArgs &eventArgs);
-	void mouseDragged(ofMouseEventArgs &eventArgs);
-	//void mousePressed(ofMouseEventArgs &eventArgs);
 
 	//--
 
@@ -155,11 +151,8 @@ private:
 	ofParameter<int> wRect{ "Width", 0,0,1920 };
 	ofParameter<int> hRect{ "Height", 0,0,1080 };
 	ofParameterGroup params_Rectangle{ "Rectangle" };
-	void Changed_Rectangle(ofAbstractParameter &e);
 
-	//window
-	float ww;
-	float hh;
+	void Changed_Rectangle(ofAbstractParameter &e);
 
 private:
 	std::string path_AppSettings;
@@ -191,66 +184,7 @@ public:
 	ofParameter<std::string> blendModeName{ "Blend Name", "" };
 	ofParameter<std::string> fileIndexName{ "File Name", "" };
 
-	//ofParameter<glm::vec2> positionCanvas;
-	//ofParameter<glm::vec2> shapeCanvas;
-
 	ofParameterGroup getParams() { return params; }
-
-	//--
-
-#ifdef USE_IMGUI
-	//--------------------------------------------------------------
-	void drawImGuiControls(float _w100, float _w99, float _w50, float _w33, float _h) {
-		if (bEnable)
-		{
-			if (ImGui::CollapsingHeader("SCENE-SVG"))
-			{
-				ImGui::PushItemWidth(_w33);
-
-				ofxSurfingHelpers::AddBigToggle(bEdit, _w100, _h / 2);
-				//ofxImGui::AddParameter(bEdit);
-
-				if (bEdit) {
-					ofxImGui::AddParameter(scaleSvg);
-					ofxImGui::AddParameter(bDrawBorder);
-					ofxImGui::AddParameter(alphaSvg);
-					ofxImGui::AddParameter(xRect);
-					ofxImGui::AddParameter(yRect);
-					ofxImGui::AddParameter(wRect);
-					ofxImGui::AddParameter(hRect);
-				}
-
-				if (ImGui::CollapsingHeader("IMAGE")) {
-					ofxImGui::AddStepper(blendMode);
-					ofxImGui::AddParameter(blendModeName);
-					ofxImGui::AddStepper(fileIndex);
-					ofxImGui::AddParameter(fileIndexName);
-#ifdef USE_SVG_MASK
-					ofxImGui::AddParameter(enable_Mask);
-					ofxImGui::AddParameter(bBgWhite);
-#endif		
-				}
-
-				ofxImGui::AddParameter(bKeys);
-				ImGui::PopItemWidth();
-
-				if (ImGui::Button("Reset SVG", ImVec2(_w100, _h / 2))) {
-					reset();
-				}
-
-				if (bEdit) {
-					if (ImGui::Button("Load", ImVec2(_w50, _h / 2))) {
-						load();
-					}
-					ImGui::SameLine();
-					if (ImGui::Button("Save", ImVec2(_w50, _h / 2))) {
-						save();
-					}
-				}
-			}
-		}
-	}
-#endif
 
 	//--
 
@@ -260,6 +194,7 @@ private:
 	void Changed_Controls(ofAbstractParameter &e);
 
 public:
+
 	//--------------------------------------------------------------
 	void setEdit(bool b)
 	{
@@ -270,22 +205,26 @@ public:
 		if (bEdit != b) bEdit = b;
 		//if (bEdit != b) bEdit.setWithoutEventNotifications(b);
 	}
+
 	//--------------------------------------------------------------
 	void setToggleEdit() {
 		setEdit(!bEdit);
 	}
 
 private:
-	float scale;
-	float alpha;
-	float ratio;
-	ofRectangle rSvgBounds;
+	float alphaBlend;
+	//float ratio;
+	
+	float scaleSource;
+	ofRectangle rectangle_SVG_Bounds;
 
 public:
 
 	ofxPanel gui;
 
 public:
+
+	void reset();
 
 	//--------------------------------------------------------------
 	void setVisible(bool b) {
@@ -297,8 +236,6 @@ public:
 		if (!bEnable && bShowGui) bEnable = true;
 
 	}
-	void reset();
-	//void refreshEdited();
 
 	//--------------------------------------------------------------
 	glm::vec2 getPositionTittle()
@@ -313,21 +250,20 @@ public:
 	//--------------------------------------------------------------
 	void setAlpha(float f)
 	{
-		alpha = f;
+		alphaBlend = f;
 	}
 	//--------------------------------------------------------------
 	void setScale(float f)
 	{
 		//TODO:
-		//this other scale is redundant... shoul remove..
+		//this other scale is redundant... should remove.. ??
+		scaleSource = f;
 
-		scale = f;
+		rectangle_SVG.setWidth(rectangle_SVG_Bounds.getWidth() * scaleSource);
+		rectangle_SVG.setHeight(rectangle_SVG_Bounds.getHeight() * scaleSource);
 
-		rectangle_SVG.setWidth(rSvgBounds.getWidth() * scale);
-		rectangle_SVG.setHeight(rSvgBounds.getHeight() * scale);
-
-		wRect = rSvgBounds.getWidth() * scale;
-		hRect = rSvgBounds.getHeight() * scale;
+		wRect = rectangle_SVG_Bounds.getWidth() * scaleSource;
+		hRect = rectangle_SVG_Bounds.getHeight() * scaleSource;
 	}
 
 	//--------------------------------------------------------------
@@ -335,10 +271,8 @@ public:
 	{
 		xRect = r.x;
 		yRect = r.y;
-		wRect = r.getWidth();
-		//hRect = r.getHeight();
-
-		//can be controlled by height!
+		hRect = r.getHeight();
+		wRect = r.getWidth();//priority
 	}
 
 	//--------------------------------------------------------------
@@ -356,12 +290,11 @@ public:
 	{
 		wRect = w;
 	}
-	//TODO:
-	////--------------------------------------------------------------
-	//void setHeight(float h)
-	//{
-	//	hRect = h;
-	//}
+	//--------------------------------------------------------------
+	void setHeight(float h)
+	{
+		hRect = h;
+	}
 
 	//--------------------------------------------------------------
 	float getRatio()
@@ -415,7 +348,7 @@ private:
 	ofParameter<int> maxNumSvgGroupColors{ "Amount Colors", 0, 0, MAX_PALETTE_COLORS };
 
 	glm::vec2 pos{ 0,0 };
-	glm::vec2 shape;
+	glm::vec2 shapeImg;
 
 	bool bModKey = false;
 
@@ -431,4 +364,61 @@ private:
 		rectangle_SVG.setWidth(_ww);
 		rectangle_SVG.setHeight(_hh);
 	}
+
+	//--
+
+public:
+#ifdef USE_IMGUI
+	//--------------------------------------------------------------
+	void drawImGuiControls(float _w100, float _w99, float _w50, float _w33, float _h) {
+		if (bEnable)
+		{
+			if (ImGui::CollapsingHeader("SCENE-SVG"))
+			{
+				ImGui::PushItemWidth(_w33);
+
+				ofxSurfingHelpers::AddBigToggle(bEdit, _w100, _h / 2);
+				//ofxImGui::AddParameter(bEdit);
+
+				if (bEdit) {
+					ofxImGui::AddParameter(scaleSvg);
+					ofxImGui::AddParameter(bDrawBorder);
+					ofxImGui::AddParameter(alphaSvg);
+					ofxImGui::AddParameter(xRect);
+					ofxImGui::AddParameter(yRect);
+					ofxImGui::AddParameter(wRect);
+					ofxImGui::AddParameter(hRect);
+				}
+
+				if (ImGui::CollapsingHeader("IMAGE")) {
+					ofxImGui::AddStepper(blendMode);
+					ofxImGui::AddParameter(blendModeName);
+					ofxImGui::AddStepper(fileIndex);
+					ofxImGui::AddParameter(fileIndexName);
+#ifdef USE_SVG_MASK
+					ofxImGui::AddParameter(enable_Mask);
+					ofxImGui::AddParameter(bBgWhite);
+#endif		
+				}
+
+				ofxImGui::AddParameter(bKeys);
+				ImGui::PopItemWidth();
+
+				if (ImGui::Button("Reset SVG", ImVec2(_w100, _h / 2))) {
+					reset();
+				}
+
+				if (bEdit) {
+					if (ImGui::Button("Load", ImVec2(_w50, _h / 2))) {
+						load();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Save", ImVec2(_w50, _h / 2))) {
+						save();
+					}
+				}
+			}
+		}
+	}
+#endif
 };
