@@ -1,5 +1,4 @@
 ofxGui
-ofxScaleDragRect
 ofxSCENE-SVG
 ofxSurfingHelpers
 ofxSvg

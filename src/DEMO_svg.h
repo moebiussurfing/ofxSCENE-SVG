@@ -28,7 +28,7 @@ Look to the image captures in /readme_images/
 //--------------------------------------------------------------
 //
 // OPTIONAL
-#define USE_IMGUI // to easy populate control widgets on other projects. Disable if you do not needs ImGui helper.
+//#define USE_IMGUI // to easy populate control widgets on other projects. Disable if you do not needs ImGui helper.
 //#define USE_MASK // to allow transparent background on the inforunt image... TODO: WIP
 //
 //--------------------------------------------------------------
@@ -39,7 +39,7 @@ Look to the image captures in /readme_images/
 #include "ofxInteractiveRect.h" 
 #include "ofxGui.h"
 #include "ofxSurfingHelpers.h"
-#include "ofxSurfing_Timers.h"
+#include "surfingTimers.h"
 #ifdef USE_MASK
 #include "ofxAlphaMask.h"
 #endif
