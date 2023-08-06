@@ -34,6 +34,8 @@ Look at the example.
 4. *Save as* **SVG Tiny 1.1**.  
 5. Put the files following the example path and filename structures.
 
+----
+
 ## Dependencies
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * ofxGui / OF Core
