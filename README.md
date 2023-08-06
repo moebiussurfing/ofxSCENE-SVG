@@ -10,14 +10,16 @@ Example:
 ![image](/readme_images/Capture3.PNG?raw=true "image")  
 
 ## Features
-- GUI and store/recall settings.
-- Resize and scale using the mouse.
-- Different Blend Modes and transparency.  
+- GUI and `store/recall settings`.
+- `Resize and scale` using the mouse.
+- Different `Blend Modes` and transparency.  
 - Selectable file with some limitations.  
 - Available `ofRectangle` to set/get position and size.
 
 ## Usage
 Look at the example.  
+
+----
 
 # **How to prepare the SVG file on Illustrator:**  
 
@@ -43,8 +45,8 @@ Look into folders for authorship, original forks, or licenses.
 * ofxSvgLoader
 
 ## TODO:
-* Size colors are hardcoded now to my two SVG samples.
-  * Cout layers amount and use these number of colors. 
+* Size colors are hardcoded now to my two `SVG` samples.
+  * Count layers amount from the imported `SVG` file and use this number of colors. 
 * Add masked mode. (?)
 
 ## Tested systems
