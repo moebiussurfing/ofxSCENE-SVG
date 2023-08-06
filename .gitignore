@@ -552,3 +552,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+example-Basic/bin/data/ofxSCENE-SVG/_DEMO_Svg_Rect.xml
+example-Basic/bin/data/ofxSCENE-SVG/DEMO_Svg.xml
