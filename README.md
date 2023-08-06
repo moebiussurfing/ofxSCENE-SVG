@@ -19,7 +19,9 @@ Example:
 ## Usage
 Look the example.  
 
-**How to prepare the SVG file on Illustrator:**  
+## **How to prepare the SVG file on Illustrator:**  
+
+### Prepare the masks/layers
 
 ![image](/readme_images/Capture1.jpg?raw=true "image")  
 ![image](/readme_images/Svg-Layers.jpg?raw=true "image")  
@@ -37,7 +39,6 @@ Look the example.
 Already included into **OF_ADDON/libs**. No need to clone/add manually.  
 Look into folders to authorship, original forks, or licenses.  
 * ofxPSBlend
-* ofxScaleDragRect
 * ofxSvg
 * ofxSvgLoader
 
@@ -50,7 +51,7 @@ Look into folders to authorship, original forks, or licenses.
 
 ## Author
 An addon by **@moebiusSurfing**  
-*(ManuMolina). 2020.*
+*(ManuMolina). 2020-2023.*
 
 ## License
 *MIT License.*
